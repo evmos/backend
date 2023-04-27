@@ -1,0 +1,53 @@
+version: "3.2"
+services:
+  cron:
+    build:
+      context: ./cronjobs
+      dockerfile: dockerfile
+    entrypoint: sh -c "./scripts/endpoint_entrypoint.sh"
+    environment:
+      - REDIS_HOST=dashboard-backend-redis
+      - REDIS_PORT=6379
+      - ENV=DEV
+    depends_on:
+      - dashboard-backend-redis
+
+  price:
+    build:
+      context: ./cronjobs
+      dockerfile: dockerfile
+    entrypoint: sh -c "./scripts/price_entrypoint.sh"
+    environment:
+      - REDIS_HOST=dashboard-backend-redis
+      - REDIS_PORT=6379
+      - ENV=DEV
+    depends_on:
+      - dashboard-backend-redis
+
+  dashboard-backend-api:
+    build:
+      context: .
+      dockerfile: dockerfile
+    environment:
+      - REDIS_HOST=dashboard-backend-redis
+    depends_on:
+      - price
+      - cron
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./cors
+      dockerfile: compose.dockerfile
+    depends_on:
+      - dashboard-backend-api
+    ports:
+      - "80:80"
+
+  dashboard-backend-redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  app-volume:

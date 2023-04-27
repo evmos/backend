@@ -1,0 +1,16 @@
+FROM python:3.10.5-buster
+RUN apt-get update && apt-get install -y netcat
+WORKDIR /code
+COPY ./requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+COPY . /code/
+
+EXPOSE 8000
+
+ENV REDIS_HOST="${REDIS_HOST}"
+ENV REDIS_PORT="${REDIS_PORT}"
+
+ENV DATABASE_URL="${DATABASE_URL}"
+
+ENV ENV="${ENV}"
+ENV LOG_FOLDER="${LOG_FOLDER}"
