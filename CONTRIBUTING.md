@@ -45,7 +45,7 @@ the following general procedure for contributing has been established:
       and allows them to provide comments early in the development process.
    6. When the code is complete it can be marked `Ready for Review`.
    7. Be sure to include a relevant change log entry in the `Unreleased` section of `CHANGELOG.md`
-      (see [file](https://github.com/evmos/backend/CHANGELOG.md) for log format).
+      (see [file](https://github.com/evmos/backend/blob/main/CHANGELOG.md) for log format).
    8. Please make sure to run `make format` before every commit -
       the easiest way to do this is having your editor run it for you upon saving a file.
       Additionally, please ensure that your code is lint compliant by running `make lint`.
