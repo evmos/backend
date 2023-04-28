@@ -9,6 +9,8 @@
   - [PR Targeting](#pr_targeting)
   - [Pull Requests](#pull_requests)
   - [Process for reviewing PRs](#reviewing_prs)
+- [Branching](#branching)
+- [Versioning](#versioning)
   <!-- markdown-link-check-enable -->
 
 ## <span id="general_procedure">General Procedure</span>
@@ -34,10 +36,10 @@ the following general procedure for contributing has been established:
       However, if you are eager and do not get a prompt response, feel free to dive on in!
    4. Follow standard Github best practices:
       1. Fork the repo
-      2. Branch from the HEAD of `development`(For core developers working within the evmos repo, to ensure a
-         clear ownership of branches, branches must be named with the convention `{moniker}/{issue#}-branch-name`).
+      2. Branch from the HEAD of `main`(For core developers working within the evmos repo, to ensure a
+         clear ownership of branches, branches must be named with the convention `{username}/{issue#}-branch-name`).
       3. Make commits
-      4. Submit a PR to `development`
+      4. Submit a PR to `main`
    5. Be sure to submit the PR in `Draft` mode.
       Submit your PR early, even if it's incomplete as this indicates to the community you're working on something
       and allows them to provide comments early in the development process.
@@ -81,9 +83,9 @@ For example, a new change to the `bank` module might have the following message:
 
 ### <span id="pr_targeting">PR Targeting</span>
 
-Ensure that you base and target your PR on the `development` branch.
+Ensure that you base and target your PR on the `main` branch.
 
-All feature additions should be targeted against `development`.
+All feature additions should be targeted against `main`.
 Bug fixes for an outstanding release candidate should be
 targeted against the release candidate branch.
 
@@ -110,3 +112,26 @@ All PRs require two Reviews before merge. When reviewing PRs, please use the fol
      (e.g. not importing testing modules in production code, or including example code modules in production code).
    - If you approve of the PR, you are responsible for fixing any of the issues mentioned here.
 3. If you are only making "surface level" reviews, submit any notes as `Comments` without adding a review.
+
+## <span id="branching">Branching</span>
+
+This repository will follow the [GitLab Flow](https://about.gitlab.com/topics/version-control/what-is-gitlab-flow/) branching strategy:
+
+- All the development will be merged to `main`
+  - `main` will be deployed to the staging environment
+- Once tested and ready to be deployed main will be merged to the branch `production`
+  - `production` will be deployed to the production environment
+
+Any development will be branched from main and be named `{username}/{issue#}-branch-name`
+
+## <span id="versioning">Versioning</span>
+
+The repository will use [semantic versioning](https://semver.org/), in short:
+
+Given a version number MAJOR.MINOR.PATCH, increment the:
+
+- MAJOR version when you make incompatible API changes
+- MINOR version when you add functionality in a backwards compatible manner
+- PATCH version when you make backwards compatible bug fixes
+
+Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
