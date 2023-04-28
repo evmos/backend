@@ -21,8 +21,8 @@ Contributing to this repo can mean many things such as participating in discussi
 To ensure a smooth workflow for all contributors,
 the following general procedure for contributing has been established:
 
-1. Either [open](https://github.com/evmos/apps/issues/new/choose)
-   or [find](https://github.com/evmos/apps/issues) an issue you have identified and would like to contribute to
+1. Either [open](https://github.com/evmos/backend/issues/new/choose)
+   or [find](https://github.com/evmos/backend/issues) an issue you have identified and would like to contribute to
    resolving.
 2. Participate in thoughtful discussion on that issue.
 3. If you would like to contribute:
@@ -45,7 +45,7 @@ the following general procedure for contributing has been established:
       and allows them to provide comments early in the development process.
    6. When the code is complete it can be marked `Ready for Review`.
    7. Be sure to include a relevant change log entry in the `Unreleased` section of `CHANGELOG.md`
-      (see file for log format).
+      (see [file](https://github.com/evmos/backend/CHANGELOG.md) for log format).
    8. Please make sure to run `make format` before every commit -
       the easiest way to do this is having your editor run it for you upon saving a file.
       Additionally, please ensure that your code is lint compliant by running `make lint`.
@@ -60,7 +60,7 @@ before an adequate design discussion has taken place in a GitHub issue,
 that PR runs a high likelihood of being rejected.
 
 Looking for a good place to start contributing?
-Check out our [good first issues](https://github.com/evmos/apps/issues?q=label%3A%22good+first+issue%22).
+Check out our [good first issues](https://github.com/evmos/backend/issues?q=label%3A%22good+first+issue%22).
 
 ## <span id="testing">Testing</span>
 
