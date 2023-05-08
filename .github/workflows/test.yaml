@@ -7,7 +7,7 @@ on:
       - production
 
 jobs:
-  test-unit-cover:
+  test-unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v4
