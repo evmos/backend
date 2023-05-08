@@ -36,6 +36,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+- (ci) [fse-478] Updating github actions and versions
+
 ### Improvements
 
 - (ci) [#107](https://github.com/evmos/backend/pull/107) Add golangci linter.

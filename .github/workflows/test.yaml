@@ -1,14 +1,28 @@
-name: docker-compose-actions-workflow
-on: 
+name: Tests
+on:
+  pull_request:
   push:
-    branches-ignore: 
+    branches:
       - main
+      - production
+
 jobs:
-  test:
+  test-unit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Build the stack
-        run: docker-compose up -d
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.19'
+          check-latest: true
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.sol
+            **/**.go
+            go.mod
+            go.sum
       - name: Test
-        run: docker run --network container:nginx appropriate/curl -s --retry 10 --retry-connrefused http://localhost:80/HealthCheck
+        run: |
+          make test
+        if: env.GIT_DIFF
