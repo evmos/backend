@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - production
 jobs:
   golangci:
     name: Run golangci-lint
