@@ -4,12 +4,13 @@
 package main
 
 import (
-	"github.com/tharsis/dashboard-backend/internal/config"
-	"github.com/tharsis/dashboard-backend/internal/rpc"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/tharsis/dashboard-backend/internal/config"
+	"github.com/tharsis/dashboard-backend/internal/rpc"
 
 	"github.com/tharsis/dashboard-backend/internal/metrics"
 )

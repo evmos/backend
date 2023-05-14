@@ -11,13 +11,13 @@ import (
 
 // Config represents the application configuration.
 type Config struct {
-	Server  ServerConfig
+	Server ServerConfig
 }
 
 // ServerConfig represents the server configuration.
+// TODO: add more server options
 type ServerConfig struct {
-	Port       int
-	ListenAddr string
+	Port int
 }
 
 // LoadConfig loads the application configuration from environment variables
@@ -28,16 +28,15 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to get current directory: %w", err)
 	}
 
-    // Build the absolute path to the target file
-    filePath := filepath.Join(dir, "internal/config/config.toml")
+	// Build the absolute path to the target file
+	filePath := filepath.Join(dir, "internal/config/config.toml")
 
 	cfg := &Config{}
-	_, err = toml.DecodeFile(filePath, cfg)
-	if err != nil {
+	if _, err = toml.DecodeFile(filePath, cfg); err != nil {
 		return nil, fmt.Errorf("failed to decode default config file: %w", err)
 	}
 
-	port, err := strconv.Atoi(os.Getenv("SERVER_PORT"))
+	port, err := strconv.Atoi(os.Getenv("RPC_SERVER_PORT"))
 	if err == nil && port != 0 {
 		cfg.Server.Port = port
 	}

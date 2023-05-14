@@ -82,6 +82,7 @@ func GovernanceProposals(ctx *fasthttp.RequestCtx) {
 	sendResponse(string(proposalRes), nil, ctx)
 }
 
+//nolint: revive
 func V1GovernanceProposals(ctx *fasthttp.RequestCtx) {
 	var proposalRes []byte
 	if redisVal, err := db.RedisGetGovernanceV1Proposals(); err == nil && redisVal != "null" {

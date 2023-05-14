@@ -27,5 +27,4 @@ func (h *Handler) Height(ctx *fasthttp.RequestCtx) {
 		Height: data.LatestBlockHeight,
 	}
 	sendSuccessfulJSONResponse(ctx, response)
-	return
 }

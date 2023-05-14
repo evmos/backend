@@ -18,7 +18,6 @@ import (
 func sendSuccessfulJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) {
 	ctx.SetStatusCode(http.StatusOK)
 	sendJSONResponse(ctx, response)
-	return
 }
 
 // --- Error Responses ---
@@ -36,7 +35,6 @@ func sendInternalErrorResponse(ctx *fasthttp.RequestCtx, message string) {
 	}
 	ctx.SetStatusCode(http.StatusInternalServerError)
 	sendErrorJSONResponse(ctx, message)
-	return
 }
 
 func sendErrorJSONResponse(ctx *fasthttp.RequestCtx, message string) {
@@ -44,7 +42,6 @@ func sendErrorJSONResponse(ctx *fasthttp.RequestCtx, message string) {
 		Error: message,
 	}
 	sendJSONResponse(ctx, errorResponse)
-	return
 }
 
 // --- JSON Responses ---
@@ -57,6 +54,5 @@ func sendJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) {
 		return
 	}
 	ctx.Response.Header.SetContentType("application/json")
-	ctx.Write(jsonResponse)
-	return
+	ctx.SetBody(jsonResponse)
 }

@@ -36,7 +36,7 @@ func NewRPCClient() (*RPCClient, error) {
 func (c *RPCClient) get(url string, v any) error {
 	req, err := http.NewRequest("GET", c.domain+url, nil)
 	if err != nil {
-		return fmt.Errorf("Error creating request: %s", err.Error())
+		return fmt.Errorf("error creating request: %s", err.Error())
 	}
 
 	// Set authorization header
@@ -48,18 +48,17 @@ func (c *RPCClient) get(url string, v any) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("Error making request: %s", err.Error())
+		return fmt.Errorf("error making request: %s", err.Error())
 	}
 	defer resp.Body.Close()
 
-	//Read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("Error reading response body: %s", err.Error())
+		return fmt.Errorf("error reading response body: %s", err.Error())
 	}
 	err = json.Unmarshal(body, v)
 	if err != nil {
-		return fmt.Errorf("Error decoding response: %s", err.Error())
+		return fmt.Errorf("error decoding response: %s", err.Error())
 	}
 
 	return nil

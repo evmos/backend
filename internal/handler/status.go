@@ -25,5 +25,5 @@ func (h *Handler) Status(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	ctx.Response.Header.SetContentType("application/json")
-	ctx.Write(jsonResponse)
+	ctx.SetBody(jsonResponse)
 }

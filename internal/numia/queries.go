@@ -9,7 +9,6 @@ type HeightResponse struct {
 // QueryHeight queries the height of the latest block on the EVMOS blockchain.
 // URL: "https://evmos.numia.xyz/height"
 func (c *RPCClient) QueryHeight() (*HeightResponse, error) {
-
 	// Unmarshal response into struct
 	var data HeightResponse
 	if err := c.get("/height", &data); err != nil {
@@ -42,7 +41,6 @@ func (c *RPCClient) QueryDelegations(address string) ([]DelegationResponse, erro
 
 	return data, nil
 }
-
 
 type RewardsResponse struct {
 	Month                 string  `json:"month"`

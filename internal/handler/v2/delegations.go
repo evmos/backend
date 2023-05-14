@@ -43,5 +43,4 @@ func (h *Handler) DelegationsByAddress(ctx *fasthttp.RequestCtx) {
 	}
 
 	sendSuccessfulJSONResponse(ctx, delegations)
-	return
 }
