@@ -4,16 +4,19 @@
 package main
 
 import (
-	"fmt"
+	"github.com/tharsis/dashboard-backend/internal/config"
+	"github.com/tharsis/dashboard-backend/internal/rpc"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/tharsis/dashboard-backend/internal/endpoints"
 	"github.com/tharsis/dashboard-backend/internal/metrics"
-	"github.com/valyala/fasthttp"
-	"github.com/valyala/fasthttp/reuseport"
 )
+
+// sk_8fca1cebffd2453cabf252b75816f627
+
+// https://evmos-rpc.numia.xyz
 
 func main() {
 	// Flush metrics if we are killing the process
@@ -25,15 +28,14 @@ func main() {
 		os.Exit(1)
 	}()
 
-	r := endpoints.CreateRouter()
-
-	ln, err := reuseport.Listen("tcp4", "0.0.0.0:8081")
+	// Load the configuration
+	cfg, err := config.LoadConfig()
 	if err != nil {
-		fmt.Printf("error in reuseport listener: %v\n", err)
-		return
+		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	if err = fasthttp.Serve(ln, r.Handler); err != nil {
-		fmt.Printf("error in fasthttp Server: %v\n", err)
+	rpcserver := rpc.NewServer(cfg)
+	if err = rpcserver.Start(); err != nil {
+		log.Printf("Error starting RPC server: %v\n", err)
 	}
 }
