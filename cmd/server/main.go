@@ -14,10 +14,6 @@ import (
 	"github.com/tharsis/dashboard-backend/internal/metrics"
 )
 
-// sk_8fca1cebffd2453cabf252b75816f627
-
-// https://evmos-rpc.numia.xyz
-
 func main() {
 	// Flush metrics if we are killing the process
 	c := make(chan os.Signal, 1)
