@@ -12,19 +12,12 @@ import (
 // Config represents the application configuration.
 type Config struct {
 	Server  ServerConfig
-	Logging LoggingConfig
 }
 
 // ServerConfig represents the server configuration.
 type ServerConfig struct {
 	Port       int
 	ListenAddr string
-}
-
-// LoggingConfig represents the log configuration.
-type LoggingConfig struct {
-	Level string
-	File  string
 }
 
 // LoadConfig loads the application configuration from environment variables
@@ -47,16 +40,6 @@ func LoadConfig() (*Config, error) {
 	port, err := strconv.Atoi(os.Getenv("SERVER_PORT"))
 	if err == nil && port != 0 {
 		cfg.Server.Port = port
-	}
-
-	logLevel := os.Getenv("LOGGING_LEVEL")
-	if cfg.Logging.Level == "" {
-		cfg.Logging.Level = logLevel
-	}
-
-	loggingFile := os.Getenv("LOGGING_FILE")
-	if cfg.Logging.File == "" {
-		cfg.Logging.File = loggingFile
 	}
 
 	return cfg, nil
