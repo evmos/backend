@@ -23,7 +23,7 @@ func NewRPCClient() (*RPCClient, error) {
 
 	endpoint := os.Getenv("NUMIA_RPC_ENDPOINT")
 	if endpoint == "" {
-		endpoint = "https://evmos.numia.xyz"
+		return nil, fmt.Errorf("NUMIA_RPC_ENDPOINT environment variable not set")
 	}
 
 	return &RPCClient{
@@ -32,6 +32,7 @@ func NewRPCClient() (*RPCClient, error) {
 	}, nil
 }
 
+// get makes a GET request to the Numia API.
 func (c *RPCClient) get(url string, v any) error {
 	req, err := http.NewRequest("GET", c.domain+url, nil)
 	if err != nil {
@@ -40,8 +41,6 @@ func (c *RPCClient) get(url string, v any) error {
 
 	// Set authorization header
 	authHeader := fmt.Sprintf("Bearer %s", c.apiKey)
-
-	// Set authorization header
 	req.Header.Set("Authorization", authHeader)
 	req.Header.Set("Accept", "application/json")
 

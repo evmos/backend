@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/BurntSushi/toml"
 )
 
 // Config represents the application configuration.
@@ -28,15 +29,17 @@ type LoggingConfig struct {
 
 // LoadConfig loads the application configuration from environment variables or default values specified in the config.toml file.
 func LoadConfig() (*Config, error) {
-	cfg := &Config{}
-	f := "config.toml"
-	if _, err := os.Stat(f); err != nil {
-		f = "_config/config.toml"
+	dir, err := os.Getwd()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current directory: %w", err)
 	}
 
-	absPath, _ := filepath.Abs("../backend/internal/config/config.toml")
 
-	_, err := toml.DecodeFile(absPath, cfg)
+    // Build the absolute path to the target file
+    filePath := filepath.Join(dir, "internal/config/config.toml")
+
+	cfg := &Config{}
+	_, err = toml.DecodeFile(filePath, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode default config file: %w", err)
 	}
