@@ -11,10 +11,9 @@ type StatusResponse struct {
 	Status string `json:"status"`
 }
 
-// HandleFastHTTP request handler in net/http style, i.e. method bound to MyHandler struct.
+// Status handles GET /status.
+// Dummy endpoint to check if the server is up and running.
 func (h *Handler) Status(ctx *fasthttp.RequestCtx) {
-	// notice that we may access MyHandler properties here - see h.foobar.
-	ctx.Logger().Printf("This is a test log")
 	ctx.SetStatusCode(http.StatusOK)
 	resp := StatusResponse{
 		Status: "OK",

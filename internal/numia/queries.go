@@ -42,3 +42,23 @@ func (c *RPCClient) QueryDelegations(address string) ([]DelegationResponse, erro
 
 	return data, nil
 }
+
+
+type RewardsResponse struct {
+	Month                 string  `json:"month"`
+	Address               string  `json:"address"`
+	WithdrawnRewardsUsd   float64 `json:"withdrawn_rewards_usd"`
+	WithdrawnRewardsEvmos float64 `json:"withdrawn_rewards_evmos"`
+}
+
+// QueryRewards queries the rewards of the requested address.
+// It handles both Hex and Bech32 addresses.
+// URL: "https://evmos.numia.xyz/evmos/rewards"
+func (c *RPCClient) QueryRewards(address string) ([]RewardsResponse, error) {
+	var data []RewardsResponse
+	if err := c.get("/evmos/rewards/"+address, &data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
