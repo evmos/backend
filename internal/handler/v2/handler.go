@@ -3,7 +3,7 @@ package v2
 import "github.com/tharsis/dashboard-backend/internal/numia"
 
 type Handler struct {
-	numiaRPCClient *numia.RPCClient
+	numiaRPCClient *numia.RPCClient // client to make RPC queries to Numia
 }
 
 func NewHandler() (*Handler, error) {
