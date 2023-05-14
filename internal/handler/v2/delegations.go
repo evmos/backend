@@ -4,7 +4,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-// DelegationsForAddress handles GET "/v2/delegations/{address}".
+// DelegationsByAddress handles GET "/v2/delegations/{address}".
 // Queries Numia and returns all delegations for a given address.
 // Accepts both bech32 and hex addresses.
 // Returns
@@ -23,7 +23,7 @@ import (
 //	}
 //
 // ]
-func (h *Handler) DelegationsForAddress(ctx *fasthttp.RequestCtx) {
+func (h *Handler) DelegationsByAddress(ctx *fasthttp.RequestCtx) {
 	address := ctx.UserValue("address").(string)
 	// TODO - validate address before querying numia
 	if address == "" {

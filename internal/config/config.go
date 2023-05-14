@@ -27,13 +27,13 @@ type LoggingConfig struct {
 	File  string
 }
 
-// LoadConfig loads the application configuration from environment variables or default values specified in the config.toml file.
+// LoadConfig loads the application configuration from environment variables
+// or default values specified in the config.toml file.
 func LoadConfig() (*Config, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current directory: %w", err)
 	}
-
 
     // Build the absolute path to the target file
     filePath := filepath.Join(dir, "internal/config/config.toml")

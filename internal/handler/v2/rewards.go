@@ -2,7 +2,7 @@ package v2
 
 import "github.com/valyala/fasthttp"
 
-// RewardsForAddress handles GET /v2/rewards/{address}.
+// RewardsByAddress handles GET /v2/rewards/{address}.
 // It returns the rewards of the requested address.
 // It handles both Hex and Bech32 addresses.
 // Returns:
@@ -16,7 +16,7 @@ import "github.com/valyala/fasthttp"
 //	}
 //
 // ]
-func (h *Handler) RewardsForAddress(ctx *fasthttp.RequestCtx) {
+func (h *Handler) RewardsByAddress(ctx *fasthttp.RequestCtx) {
 	address := ctx.UserValue("address").(string)
 	// TODO - validate address before querying numia
 	if address == "" {
