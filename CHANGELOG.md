@@ -37,7 +37,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ## Unreleased
 
 - (ci) [fse-478] Updating github actions and versions
-- (ci) [#5] RPC server refactor
+- (ci) [#5](https://github.com/evmos/backend/pull/5) RPC server refactor
 
 ### Improvements
 
