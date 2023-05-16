@@ -1,7 +1,7 @@
 // Copyright Tharsis Labs Ltd.(Evmos)
 // SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/backend/blob/main/LICENSE)
 
-package endpoints
+package v1
 
 import (
 	"encoding/json"
@@ -82,7 +82,7 @@ func GovernanceProposals(ctx *fasthttp.RequestCtx) {
 	sendResponse(string(proposalRes), nil, ctx)
 }
 
-func V1GovernanceProposals(ctx *fasthttp.RequestCtx) {
+func V1GovernanceProposals(ctx *fasthttp.RequestCtx) { //nolint: revive
 	var proposalRes []byte
 	if redisVal, err := db.RedisGetGovernanceV1Proposals(); err == nil && redisVal != "null" {
 		proposalRes = []byte(redisVal)
