@@ -1,14 +1,13 @@
 // Copyright Tharsis Labs Ltd.(Evmos)
 // SPDX-License-Identifier:ENCL-1.0(https://github.com/evmos/backend/blob/main/LICENSE)
 
-package endpoints
+package v1
 
 import (
 	"github.com/fasthttp/router"
 )
 
-func CreateRouter() *router.Router {
-	r := router.New()
+func RegisterRoutes(r *router.Router) {
 	AddCustomRoutes(r)
 	AddProxyRoutes(r)
 	AddPriceRoutes(r)
@@ -22,5 +21,4 @@ func CreateRouter() *router.Router {
 	AddStakingRoutes(r)
 	AddGovernanceRoutes(r)
 	AddValidatorsRoutes(r)
-	return r
 }
