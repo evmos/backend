@@ -89,18 +89,26 @@ func QueryGithubWithCache(url string) (string, error) {
 	return bodyString, nil
 }
 
+func getChainTokenRegistryURL() string {
+	env := os.Getenv("ENVIRONMENT")
+	if env == "production" {
+		return "https://api.github.com/repos/evmos/chain-token-registry/git/trees/production?recursive=1"
+	}
+	return "https://api.github.com/repos/evmos/chain-token-registry/git/trees/main?recursive=1"
+}
+
 func GetValidatorDirectory() ([]File, error) {
 	ValidatorsDirectoryURL := "https://api.github.com/repos/evmos/validator-directory/git/trees/main?recursive=1"
 	return GetJsonsFromFolder(ValidatorsDirectoryURL, "mainnet")
 }
 
 func GetERC20TokensDirectory() ([]File, error) {
-	ERC20TokensDirectoryURL := "https://api.github.com/repos/evmos/chain-token-registry/git/trees/main?recursive=1" //nolint:all
+	ERC20TokensDirectoryURL := getChainTokenRegistryURL() //nolint:all
 	return GetJsonsFromFolder(ERC20TokensDirectoryURL, "tokens")
 }
 
 func GetNetworkConfig() ([]File, error) {
-	url := "https://api.github.com/repos/evmos/chain-token-registry/git/trees/main?recursive=1"
+	url := getChainTokenRegistryURL()
 	return GetJsonsFromFolder(url, "chainConfig")
 }
 

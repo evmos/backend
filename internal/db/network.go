@@ -4,6 +4,7 @@
 package db
 
 import (
+	"os"
 	"time"
 )
 
@@ -14,28 +15,35 @@ import (
 // 	return sb.String()
 // }
 
-var networkConfig = "git-network-config-directory"
+func getNetworkConfigKey() string {
+	var env = os.Getenv("ENVIRONMENT")
+	if env == "production" {
+		return "prod-git-network-config-directory"
+	} else {
+		return "git-network-config-directory"
+	}
+}
 
 func RedisSetNetworkConfig(result string) {
-	err := rdb.Set(ctxRedis, networkConfig, result, time.Duration(expiration*int(time.Second))).Err()
+	err := rdb.Set(ctxRedis, getNetworkConfigKey(), result, time.Duration(expiration*int(time.Second))).Err()
 	if err != nil {
 		panic(err)
 	}
 }
 
 func RedisGetNetworkConfig() (string, error) {
-	val, err := rdb.Get(ctxRedis, networkConfig).Result()
+	val, err := rdb.Get(ctxRedis, getNetworkConfigKey()).Result()
 	return formatRedisResponse(val, err)
 }
 
 func RedisSetNetworkConfigByName(name string, result string) {
-	err := rdb.Set(ctxRedis, networkConfig+name, result, time.Duration(expiration*int(time.Second))).Err()
+	err := rdb.Set(ctxRedis, getNetworkConfigKey()+name, result, time.Duration(expiration*int(time.Second))).Err()
 	if err != nil {
 		panic(err)
 	}
 }
 
 func RedisGetNetworkConfigByName(name string) (string, error) {
-	val, err := rdb.Get(ctxRedis, networkConfig+name).Result()
+	val, err := rdb.Get(ctxRedis, getNetworkConfigKey()+name).Result()
 	return formatRedisResponse(val, err)
 }
