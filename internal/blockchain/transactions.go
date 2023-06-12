@@ -14,6 +14,8 @@ import (
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ibctransfer "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 )
 
 type MessageSendParams struct {
@@ -24,76 +26,94 @@ type MessageSendParams struct {
 }
 
 func CreateMessageSend(sender string, receiver string, amount sdkmath.Int, denom string, prefix string) (sdk.Msg, error) {
-	from, err := Bech32StringToAddress(sender, prefix)
+	from, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
-		return &bankTypes.MsgSend{}, fmt.Errorf("error creating from address: %q", err)
+		return &bankTypes.MsgSend{}, fmt.Errorf("error creating from address: %s", err)
 	}
-	to, err := Bech32StringToAddress(receiver, prefix)
+	to, err := sdk.AccAddressFromBech32(receiver)
 	if err != nil {
-		return &bankTypes.MsgSend{}, fmt.Errorf("error creating to address: %q", err)
+		return &bankTypes.MsgSend{}, fmt.Errorf("error creating to address: %s", err)
 	}
 
-	msgSendSdk := bankTypes.NewMsgSend(from, to, SdkIntToCoins(amount, denom))
+	msg := bankTypes.NewMsgSend(from, to, sdk.Coins{{Denom: denom, Amount: amount}})
 
-	return msgSendSdk, nil
+	return msg, msg.ValidateBasic()
 }
 
 func CreateMsgDelegate(amount sdkmath.Int, accountAddress string, validator string, denom string) (sdk.Msg, error) {
-	delegateMsg := stakingtypes.MsgDelegate{
+	msg := stakingtypes.MsgDelegate{
 		DelegatorAddress: accountAddress,
 		ValidatorAddress: validator,
-		Amount:           SdkIntToCoin(amount, denom),
+		Amount:           sdk.Coin{Denom: denom, Amount: amount},
 	}
 
-	return &delegateMsg, nil
+	return &msg, msg.ValidateBasic()
 }
 
 func CreateMsgUndelegate(amount sdkmath.Int, accountAddress string, validator string, denom string) (sdk.Msg, error) {
-	undelegateMsg := stakingtypes.MsgUndelegate{
+	msg := stakingtypes.MsgUndelegate{
 		DelegatorAddress: accountAddress,
 		ValidatorAddress: validator,
-		Amount:           SdkIntToCoin(amount, denom),
+		Amount:           sdk.Coin{Denom: denom, Amount: amount},
 	}
 
-	return &undelegateMsg, nil
+	return &msg, msg.ValidateBasic()
 }
 
 func CreateMsgRedelegate(amount sdkmath.Int, accountAddress string, validator string, validatorDst string, denom string) (sdk.Msg, error) {
-	beginRedelegateMsg := stakingtypes.MsgBeginRedelegate{
+	msg := stakingtypes.MsgBeginRedelegate{
 		DelegatorAddress:    accountAddress,
 		ValidatorSrcAddress: validator,
 		ValidatorDstAddress: validatorDst,
-		Amount:              SdkIntToCoin(amount, denom),
+		Amount:              sdk.Coin{Denom: denom, Amount: amount},
 	}
 
-	return &beginRedelegateMsg, nil
+	return &msg, msg.ValidateBasic()
 }
 
 func CreateMsgVote(proposalID int, option int, voter string) (sdk.Msg, error) {
 	vo := govtypes.VoteOption(option)
-	voteMsg := govtypes.MsgVote{
+	msg := govtypes.MsgVote{
 		ProposalId: uint64(proposalID),
 		Option:     vo,
 		Voter:      voter,
 	}
-	return &voteMsg, nil
+	return &msg, msg.ValidateBasic()
 }
 
 func CreateMsgRewards(accountAddress string, validator string) (sdk.Msg, error) {
-	beginRedelegateMsg := distributiontypes.MsgWithdrawDelegatorReward{
+	msg := distributiontypes.MsgWithdrawDelegatorReward{
 		DelegatorAddress: accountAddress,
 		ValidatorAddress: validator,
 	}
-	return &beginRedelegateMsg, nil
+	return &msg, msg.ValidateBasic()
 }
 
 func CreateMsgCancelUndelegations(amount sdkmath.Int, accountAddress string, validator string, denom string, height int64) (sdk.Msg, error) {
-	cancelUndelegationsMsg := stakingtypes.MsgCancelUnbondingDelegation{
+	msg := stakingtypes.MsgCancelUnbondingDelegation{
 		DelegatorAddress: accountAddress,
 		ValidatorAddress: validator,
-		Amount:           SdkIntToCoin(amount, denom),
+		Amount:           sdk.Coin{Denom: denom, Amount: amount},
 		CreationHeight:   height,
 	}
 
-	return &cancelUndelegationsMsg, nil
+	return &msg, msg.ValidateBasic()
+}
+
+func CreateMsgTransfer(
+	sourcePort string,
+	sourceChannel string,
+	amount sdkmath.Int,
+	denom string,
+	sender string,
+	receiver string,
+	revisionNumber uint64,
+	revisionHeight uint64,
+	timeoutTimestamp uint64,
+	memo string,
+) (sdk.Msg, error) {
+	timeoutHeight := clienttypes.Height{RevisionNumber: revisionNumber, RevisionHeight: revisionHeight}
+
+	msg := ibctransfer.NewMsgTransfer(sourcePort, sourceChannel, amount, denom, sender, receiver, timeoutHeight, timeoutTimestamp, "")
+	return msg, msg.ValidateBasic()
 }

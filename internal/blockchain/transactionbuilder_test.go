@@ -222,7 +222,7 @@ func TestCreateTransactionWithIBCTransfer(t *testing.T) {
 		return
 	}
 
-	msg := CreateMsgTransfer("transfer", srcChannel, sdk.NewInt(1), "aevmos", "evmos14uepnqnvkuyyvwe65wmncejq5g2f0tjft3wr65", "osmo1j30xhsxcqss0n662wrma0vqw4zcx285munun8a", 1, 6641130, 9223372036854775808)
+	msg, err := CreateMsgTransfer("transfer", srcChannel, sdk.NewInt(1), "aevmos", "evmos14uepnqnvkuyyvwe65wmncejq5g2f0tjft3wr65", "osmo1j30xhsxcqss0n662wrma0vqw4zcx285munun8a", 1, 6641130, 9223372036854775808)
 
 	pubKey, err := base64.StdEncoding.DecodeString("Ak8wUTcElcOofCZZJM97pduO+Aw3w4wzClrJgN2VzTVQ")
 	if err != nil {

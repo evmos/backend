@@ -63,18 +63,18 @@ func GetERC20Balance(contract string, wallet string) (string, error) {
 
 func CreateMsgConvertCoin(amount sdkmath.Int, token string, receiver string, sender string, prefix string) (sdk.Msg, error) {
 	// to erc20
-	from, err := Bech32StringToAddress(sender, prefix)
+	from, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
 		return &types.MsgConvertCoin{}, fmt.Errorf("error creating from address: %q", err)
 	}
 
-	msgConvert := types.NewMsgConvertCoin(SdkIntToCoin(amount, token), common.HexToAddress(receiver), from)
+	msgConvert := types.NewMsgConvertCoin(sdk.Coin{Denom: token, Amount: amount}, common.HexToAddress(receiver), from)
 	return msgConvert, nil
 }
 
 func CreateMsgConvertERC20(amount sdkmath.Int, receiver string, contract string, sender string, prefix string) (sdk.Msg, error) {
 	// to ibc
-	to, err := Bech32StringToAddress(receiver, prefix)
+	to, err := sdk.AccAddressFromBech32(receiver)
 	if err != nil {
 		return &types.MsgConvertERC20{}, fmt.Errorf("error creating to address: %q", err)
 	}
