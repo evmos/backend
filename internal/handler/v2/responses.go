@@ -31,11 +31,8 @@ type ErrorResponse struct {
 
 // sendInternalErrorResponse sends an internal error response to the client.
 // It sets the status code to 500.
-func sendInternalErrorResponse(ctx *fasthttp.RequestCtx, message string) {
-	// if message is empty, set default message for internal errors
-	if message == "" {
-		message = "Something went wrong, please try again later"
-	}
+func sendInternalErrorResponse(ctx *fasthttp.RequestCtx) {
+	message := "Something went wrong, please try again later"
 	ctx.SetStatusCode(http.StatusInternalServerError)
 	sendErrorJSONResponse(ctx, message)
 }
