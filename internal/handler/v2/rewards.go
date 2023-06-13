@@ -34,7 +34,7 @@ func (h *Handler) RewardsByAddress(ctx *fasthttp.RequestCtx) {
 	rewards, err := h.numiaRPCClient.QueryRewards(address)
 	if err != nil {
 		ctx.Logger().Printf("Error querying rewards from Numia: %s", err.Error())
-		sendInternalErrorResponse(ctx, "")
+		sendInternalErrorResponse(ctx)
 		return
 	}
 

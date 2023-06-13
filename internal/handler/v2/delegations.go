@@ -41,7 +41,7 @@ func (h *Handler) DelegationsByAddress(ctx *fasthttp.RequestCtx) {
 	delegations, err := h.numiaRPCClient.QueryDelegations(address)
 	if err != nil {
 		ctx.Logger().Printf("Error querying delegations from Numia: %s", err.Error())
-		sendInternalErrorResponse(ctx, "")
+		sendInternalErrorResponse(ctx)
 		return
 	}
 

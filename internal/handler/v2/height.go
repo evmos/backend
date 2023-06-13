@@ -22,7 +22,7 @@ func (h *Handler) Height(ctx *fasthttp.RequestCtx) {
 	data, err := h.numiaRPCClient.QueryHeight()
 	if err != nil {
 		ctx.Logger().Printf("Error querying height: %s", err.Error())
-		sendInternalErrorResponse(ctx, "")
+		sendInternalErrorResponse(ctx)
 		return
 	}
 

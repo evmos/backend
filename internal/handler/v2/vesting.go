@@ -82,7 +82,7 @@ func (h *Handler) VestingByAddress(ctx *fasthttp.RequestCtx) {
 	rewards, err := h.numiaRPCClient.QueryVestingAccount(address)
 	if err != nil {
 		ctx.Logger().Printf("Error querying vesting account from Numia: %s", err.Error())
-		sendInternalErrorResponse(ctx, "")
+		sendInternalErrorResponse(ctx)
 		return
 	}
 
