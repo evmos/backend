@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/blockchain"
 	"github.com/valyala/fasthttp"
 )

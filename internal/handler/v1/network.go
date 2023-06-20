@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/db"
 	"github.com/tharsis/dashboard-backend/internal/requester"
 	"github.com/tharsis/dashboard-backend/internal/resources"

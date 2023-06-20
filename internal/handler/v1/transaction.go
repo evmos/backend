@@ -29,7 +29,6 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	tx3 "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/blockchain"
 	"github.com/tharsis/dashboard-backend/internal/constants"
 	"github.com/valyala/fasthttp"

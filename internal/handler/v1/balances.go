@@ -4,10 +4,6 @@
 package v1
 
 import (
-	"encoding/json"
-
-	"github.com/fasthttp/router"
-	"github.com/tharsis/dashboard-backend/internal/blockchain"
 	"github.com/tharsis/dashboard-backend/internal/resources"
 	"github.com/valyala/fasthttp"
 )

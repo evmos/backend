@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/db"
 	"github.com/tharsis/dashboard-backend/internal/resources"
 	"github.com/valyala/fasthttp"
