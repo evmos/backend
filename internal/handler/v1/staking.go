@@ -146,8 +146,3 @@ func StakingInfo(ctx *fasthttp.RequestCtx) {
 
 	sendResponse(string(res), nil, ctx)
 }
-
-func AddStakingRoutes(r *router.Router) {
-	r.GET("/totalStakedByAddress/{address}", TotalStakingByAddress)
-	r.GET("/stakingInfo/{address}", StakingInfo)
-}

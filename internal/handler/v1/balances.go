@@ -49,63 +49,6 @@ func BalanceByNetworkAndDenom(ctx *fasthttp.RequestCtx) {
 	sendResponse(val, err, ctx)
 }
 
-func EVMOSIBCBalances(ctx *fasthttp.RequestCtx) {
-	pubKey := paramToString("pubkey", ctx)
-
-	networkConfigs, err := resources.GetNetworkConfigs()
-	if err != nil {
-		sendResponse("Unable to get registry configurations", err, ctx)
-		return
-	}
-
-	balances := []EVMOSBalance{}
-
-	// TODO: We should send all the requests at the same time to speed up this call
-	for _, v := range networkConfigs {
-		derivedAddress, err := blockchain.DeriveCosmosAddress(pubKey, v.Prefix)
-		if err != nil {
-			// Unable to derive address
-			continue
-		}
-
-		configuration := resources.GetMainnetConfig(v)
-		evmosIbcDenom, err := GetDenom("EVMOS", configuration.Identifier)
-		if err != nil {
-			// Unable to get EVMOS denom for source chain
-			continue
-		}
-
-		endpoint := BuildFourParamEndpoint("/cosmos/bank/v1beta1/balances/", derivedAddress, "/by_denom?denom=", evmosIbcDenom)
-		val, err := getRequestRest(configuration.Identifier, endpoint)
-		if err != nil {
-			// Unable to get EVMOS balance in chain provided
-			continue
-		}
-
-		var balance BalanceResponse
-
-		err = json.Unmarshal([]byte(val), &balance)
-
-		if err != nil {
-			// Unable to get EVMOS balance in chain provided
-			continue
-		}
-
-		balances = append(balances, EVMOSBalance{
-			Chain:        configuration.Identifier,
-			EvmosBalance: balance.Balance.Amount,
-		})
-	}
-
-	res, err := json.Marshal(balances)
-	if err != nil {
-		sendResponse("Unable to get EVMOS balances", err, ctx)
-		return
-	}
-
-	sendResponse("{\"values\":"+string(res)+"}", err, ctx)
-}
-
 func EVMOSIBCBalance(ctx *fasthttp.RequestCtx) {
 	sourceChain := getChain(ctx)
 
@@ -121,10 +64,4 @@ func EVMOSIBCBalance(ctx *fasthttp.RequestCtx) {
 		sendResponse("Unable to get EVMOS balance in chain provided", err, ctx)
 	}
 	sendResponse(val, err, ctx)
-}
-
-func AddBalancesRoutes(r *router.Router) {
-	r.GET("/BalanceByNetworkAndDenom/{chain}/{token}/{address}", BalanceByNetworkAndDenom)
-	r.GET("/EVMOSIBCBalances/{pubkey:*}", EVMOSIBCBalances)
-	r.GET("/EVMOSIBCBalance/{chain}/{address}", EVMOSIBCBalance)
 }

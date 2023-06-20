@@ -51,37 +51,6 @@ func ProcessProposals(proposalsRes string, v1 bool) ([]byte, error) {
 	return proposalRes, nil
 }
 
-// This endpoint returns a list of the latest 50 governance proposals. In order
-// to support both v1 and v1beta1 versions this endpoint converts the v1 payload
-// to be the same as the v1beta1 payload.
-func GovernanceProposals(ctx *fasthttp.RequestCtx) {
-	var proposalRes []byte
-	if redisVal, err := db.RedisGetGovernanceProposals(); err == nil && redisVal != "null" {
-		proposalRes = []byte(redisVal)
-		if err != nil {
-			sendResponse("Unable to fetch governance proposals", err, ctx)
-			return
-		}
-	} else {
-		endpoint := buildThreeParamEndpoint("/cosmos/gov/v1/proposals?pagination.limit=", "50", "&pagination.reverse=true")
-		val, err := getRequestRest("EVMOS", endpoint)
-		if err != nil {
-			sendResponse("Unable to fetch governance proposals", err, ctx)
-			return
-		}
-
-		// Process and convert v1 payload into v1beta1 payload version
-		proposalRes, err = ProcessProposals(val, false)
-		if err != nil {
-			sendResponse("Unable to fetch governance proposals", err, ctx)
-			return
-		}
-
-		db.RedisSetGovernanceProposals(string(proposalRes))
-	}
-	sendResponse(string(proposalRes), nil, ctx)
-}
-
 func V1GovernanceProposals(ctx *fasthttp.RequestCtx) { //nolint: revive
 	var proposalRes []byte
 	if redisVal, err := db.RedisGetGovernanceV1Proposals(); err == nil && redisVal != "null" {
@@ -108,9 +77,4 @@ func V1GovernanceProposals(ctx *fasthttp.RequestCtx) { //nolint: revive
 		db.RedisSetGovernanceV1Proposals(string(proposalRes))
 	}
 	sendResponse(string(proposalRes), nil, ctx)
-}
-
-func AddGovernanceRoutes(r *router.Router) {
-	r.GET("/Proposals", GovernanceProposals)
-	r.GET("/V1Proposals", V1GovernanceProposals)
 }

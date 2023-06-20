@@ -8,10 +8,60 @@ import (
 	"sort"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/db"
 	"github.com/valyala/fasthttp"
 )
+
+// Types
+
+// TODO: add all the others properties from the github schema
+type ValidatorsRegistery struct {
+	OperatorAddress string `json:"operator_address"`
+}
+
+type ConsensusKey struct {
+	TypeURL string `json:"type_url"`
+	Value   string `json:"value"`
+}
+
+type Description struct {
+	Moniker         string `json:"moniker"`
+	Identity        string `json:"identity"`
+	Website         string `json:"website"`
+	SecurityContact string `json:"security_contact"`
+	Details         string `json:"details"`
+}
+
+type CommissionRate struct {
+	Rate          string `json:"rate"`
+	MaxRate       string `json:"max_rate"`
+	MaxChangeRate string `json:"max_change_rate"`
+}
+
+type Commission struct {
+	CommissionRate CommissionRate `json:"commission_rates"`
+	UpdateTime     string         `json:"update_time"`
+}
+
+type Validator struct {
+	OperatorAddress   string       `json:"operator_address"`
+	ConsensusKey      ConsensusKey `json:"consensus_pubkey"`
+	Jailed            bool         `json:"jailed"`
+	Status            string       `json:"status"`
+	Tokens            string       `json:"tokens"`
+	DelegatorShares   string       `json:"delegator_shares"`
+	Description       Description  `json:"description"`
+	UnbondingHeight   string       `json:"unbonding_height"`
+	UnbondingTime     string       `json:"unbonding_time"`
+	Commission        Commission   `json:"commission"`
+	MinSelfDelegation string       `json:"min_self_delegation"`
+	Rank              int          `json:"rank"`
+}
+
+type ValidatorAPIResponse struct {
+	Validators []Validator `json:"validators"`
+	Pagination Pagination  `json:"pagination"`
+}
 
 func AllValidators(ctx *fasthttp.RequestCtx) {
 	if validators, err := db.RedisGetAllValidators("EVMOS"); err == nil {
@@ -60,8 +110,4 @@ func AllValidators(ctx *fasthttp.RequestCtx) {
 
 	db.RedisSetAllValidators("EVMOS", validatorsJSON)
 	sendResponse("{\"values\":"+validatorsJSON+"}", err, ctx)
-}
-
-func AddValidatorsRoutes(r *router.Router) {
-	r.GET("/AllValidators", AllValidators)
 }

@@ -87,8 +87,3 @@ func NetworkConfigByName(ctx *fasthttp.RequestCtx) {
 	}
 	sendResponse(val, nil, ctx)
 }
-
-func AddNetworkRoutes(r *router.Router) {
-	r.GET("/NetworkConfig", NetworkConfig)
-	r.GET("/NetworkConfig/{name}", NetworkConfigByName)
-}
