@@ -15,7 +15,7 @@ func RegisterRoutes(r *router.Router) {
 	// announcements
 	r.GET("/Announcements", GetAnnouncements)
 
-	//config
+	// config
 	r.GET("/NetworkConfig", NetworkConfig)
 	r.GET("/NetworkConfig/{name}", NetworkConfigByName)
 
@@ -30,7 +30,7 @@ func RegisterRoutes(r *router.Router) {
 	// distribution
 	r.POST("/rewards", Rewards)
 
-	//tx
+	// tx
 	r.GET("/isIBCExecuted/{tx_hash}/{chain}", isIBCExecuted)
 	r.POST("/broadcastEip712", BroadcastMetamask)
 	r.POST("/broadcastAmino", BroadcastAmino)
@@ -47,7 +47,7 @@ func RegisterRoutes(r *router.Router) {
 	r.GET("/stakingInfo/{address}", StakingInfo)
 	r.POST("/cancelUndelegation", CancelUndelegation)
 
-	//gov
+	// gov
 	r.GET("/VoteRecord/{chain}/{proposal_id}/{address}", VoteRecord)
 	r.GET("/V1Proposals", V1GovernanceProposals)
 	r.POST("/vote", Vote)
