@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/db"
 	"github.com/tharsis/dashboard-backend/internal/resources"
 	"github.com/valyala/fasthttp"
@@ -73,16 +72,6 @@ func ChainHeightInternal(chain string) (string, string, error) {
 	}
 
 	return "", "", fmt.Errorf("invalid status response")
-}
-
-func ChainHeight(ctx *fasthttp.RequestCtx) {
-	height, revision, err := ChainHeightInternal(getChain(ctx))
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-	val := `{"height":` + height + `,"revision":` + revision + `}`
-	sendResponse(val, err, ctx)
 }
 
 type TxStatusType string
@@ -285,14 +274,4 @@ func isIBCExecuted(ctx *fasthttp.RequestCtx) {
 	}
 
 	sendResponse(isIBCExecutedResponse(true, "IBC ack ready"), nil, ctx)
-}
-
-func healthCheck(ctx *fasthttp.RequestCtx) {
-	sendResponse("{\"status\": \"active\"}", nil, ctx)
-}
-
-func AddUtilsRoutes(r *router.Router) {
-	r.GET("/ChainHeight/{chain}", ChainHeight)
-	r.GET("/isIBCExecuted/{tx_hash}/{chain}", isIBCExecuted)
-	r.GET("/HealthCheck", healthCheck)
 }

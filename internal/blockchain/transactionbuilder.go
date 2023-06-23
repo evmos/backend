@@ -187,8 +187,9 @@ func CreateTransactionWithMessage(
 	bytes := []byte{}
 
 	gasAmount := sdk.NewCoins(sdk.NewCoin(denom, fee))
-	feeSdk := legacytx.NewStdFee(gasLimit, gasAmount) //nolint:staticcheck
 
+	//nolint:staticcheck
+	feeSdk := legacytx.NewStdFee(gasLimit, gasAmount)
 	// TODO: use AuxTxBuilder
 	dataAmino := legacytx.StdSignBytes(chainID, accountNumber, sequence, 0, feeSdk, sdkMessages, memo, nil)
 

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/db"
 	"github.com/tharsis/dashboard-backend/internal/requester"
 	"github.com/tharsis/dashboard-backend/internal/resources"
@@ -86,9 +85,4 @@ func NetworkConfigByName(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	sendResponse(val, nil, ctx)
-}
-
-func AddNetworkRoutes(r *router.Router) {
-	r.GET("/NetworkConfig", NetworkConfig)
-	r.GET("/NetworkConfig/{name}", NetworkConfigByName)
 }

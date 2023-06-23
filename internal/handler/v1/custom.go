@@ -10,7 +10,6 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/db"
 	"github.com/valyala/fasthttp"
 )
@@ -156,151 +155,6 @@ func GetValidatorsWithNoFilter(chain string) (map[string]Validator, error) {
 	return valMap, nil
 }
 
-func UnbondingByAddressWithValidatorInfo(ctx *fasthttp.RequestCtx) {
-	chain := getChain(ctx)
-	address := paramToString("address", ctx)
-
-	if val, err := db.RedisGetUnbondingByAddressWithValidatorInfo(chain, address); err == nil {
-		sendResponse(val, nil, ctx)
-		return
-	}
-
-	endpoint := buildThreeParamEndpoint("/cosmos/staking/v1beta1/delegators/", address, "/unbonding_delegations")
-	val, err := getRequestRest(chain, endpoint)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	var unbodings UnbondingResponseAPI
-	err = json.Unmarshal([]byte(val), &unbodings)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	valMap, err := GetValidatorsWithNoFilter(chain)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	res := []interface{}{}
-	for _, u := range unbodings.UnbondingResponses {
-		_, exists := valMap[u.ValidatorAddress]
-		if exists {
-			u.Validator = valMap[u.ValidatorAddress]
-		}
-		res = append(res, u)
-	}
-
-	valuesToSend, err := json.Marshal(res)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	value := "{\"values\":" + string(valuesToSend) + "}"
-
-	db.RedisSetUnbondingByAddressWithValidatorInfo(chain, address, value)
-
-	sendResponse(value, nil, ctx)
-}
-
-func DelegationsByAddressWithValidatorRanks(ctx *fasthttp.RequestCtx) {
-	chain := getChain(ctx)
-	address := paramToString("address", ctx)
-
-	if val, err := db.RedisGetDelegationsByAddressWithValidatorRanks(chain, address); err == nil {
-		sendResponse(val, nil, ctx)
-		return
-	}
-
-	endpoint := buildThreeParamEndpoint("/cosmos/staking/v1beta1/delegations/", address, "?pagination.limit=200")
-	val, _ := getRequestRest(getChain(ctx), endpoint)
-
-	// ValidatorsWithRank
-	valWithRanks, err := GetValidatorsWithRanks(chain)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	// Parse the response to append the ranks
-	var delegation DelegationResponsesResponse
-	err = json.Unmarshal([]byte(val), &delegation)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	for i, v := range delegation.DelegationResponse {
-		item := v.Delegation
-		if val, ok := valWithRanks[item.ValidatorAddress]; ok {
-			item.ValidatorRank = val.Rank
-		} else {
-			item.ValidatorRank = -1
-		}
-		delegation.DelegationResponse[i].Delegation = item
-	}
-
-	valuesToSend, err := json.Marshal(delegation)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	db.RedisSetDelegationsByAddressWithValidatorRanks(chain, address, string(valuesToSend))
-	sendResponse(string(valuesToSend), err, ctx)
-}
-
-func ValidatorsByAddressWithValidatorRanks(ctx *fasthttp.RequestCtx) {
-	chain := getChain(ctx)
-	address := paramToString("address", ctx)
-
-	if val, err := db.RedisGetValidatorsByAddressWithValidatorRanks(chain, address); err == nil {
-		sendResponse(val, nil, ctx)
-		return
-	}
-
-	endpoint := buildThreeParamEndpoint("/cosmos/staking/v1beta1/delegators/", address, "/validators")
-	val, _ := getRequestRest(chain, endpoint)
-
-	// ValidatorsWithRank
-	valWithRanks, err := GetValidatorsWithRanks(chain)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	// Parse the response to append the ranks
-	var validators ValidatorAPIResponse
-	err = json.Unmarshal([]byte(val), &validators)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	for i, v := range validators.Validators {
-		item := v
-		if val, ok := valWithRanks[item.OperatorAddress]; ok {
-			item.Rank = val.Rank
-		} else {
-			item.Rank = -1
-		}
-		validators.Validators[i] = item
-	}
-
-	valuesToSend, err := json.Marshal(validators)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	db.RedisSetValidatorsByAddressWithValidatorRanks(chain, address, string(valuesToSend))
-	sendResponse(string(valuesToSend), err, ctx)
-}
-
 func RemainingEpochs(ctx *fasthttp.RequestCtx) {
 	// query skipped epochs
 	skippedEndpoint := "/evmos/inflation/v1/skipped_epochs"
@@ -354,11 +208,4 @@ func RemainingEpochs(ctx *fasthttp.RequestCtx) {
 	}
 
 	sendResponse(string(res), err, ctx)
-}
-
-func AddCustomRoutes(r *router.Router) {
-	r.GET("/UnbondingByAddressWithValidatorInfo/{chain}/{address}", UnbondingByAddressWithValidatorInfo)
-	r.GET("/ValidatorsByAddressWithValidatorRanks/{chain}/{address}", ValidatorsByAddressWithValidatorRanks)
-	r.GET("/DelegationsByAddressWithValidatorRanks/{chain}/{address}", DelegationsByAddressWithValidatorRanks)
-	r.GET("/RemainingEpochs", RemainingEpochs)
 }
