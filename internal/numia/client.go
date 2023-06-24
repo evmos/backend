@@ -21,12 +21,12 @@ type RPCClient struct {
 func NewRPCClient() (*RPCClient, error) {
 	apiKey := os.Getenv("NUMIA_API_KEY")
 	if apiKey == "" {
-		return nil, fmt.Errorf("NUMIA_API_KEY environment variable not set")
+		//return nil, fmt.Errorf("NUMIA_API_KEY environment variable not set")
 	}
 
 	endpoint := os.Getenv("NUMIA_RPC_ENDPOINT")
 	if endpoint == "" {
-		return nil, fmt.Errorf("NUMIA_RPC_ENDPOINT environment variable not set")
+		//return nil, fmt.Errorf("NUMIA_RPC_ENDPOINT environment variable not set")
 	}
 
 	return &RPCClient{

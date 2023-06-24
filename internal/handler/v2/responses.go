@@ -37,6 +37,13 @@ func sendInternalErrorResponse(ctx *fasthttp.RequestCtx) {
 	sendErrorJSONResponse(ctx, message)
 }
 
+// sendBadRequestResponse sends a bad request response to the client.
+// It sets the status code to 400.
+func sendBadRequestResponse(ctx *fasthttp.RequestCtx, message string) {
+	ctx.SetStatusCode(http.StatusBadRequest)
+	sendErrorJSONResponse(ctx, message)
+}
+
 func sendErrorJSONResponse(ctx *fasthttp.RequestCtx, message string) {
 	errorResponse := &ErrorResponse{
 		Error: message,

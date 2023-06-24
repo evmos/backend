@@ -23,6 +23,22 @@ func RedisGetEndpoint(chain, endpoint, index string) (string, error) {
 	return formatRedisResponse(val, err)
 }
 
+//func GetRestEndpointFromRedis(chain, endpoint string) (string, error) {
+//	i := 1
+//    var (
+//      endpoint string
+//      err error
+//    )
+//	for i < 4 {
+//		endpoint, err = RedisGetEndpoint(chain, "rest", strconv.FormatInt(int64(i), 10))
+//		if err != nil {
+//			i++
+//			continue
+//		}
+//
+//	}
+//}
+
 func RedisSetEndpoint(chain, endpoint, index, url string) {
 	key := buildKeyEndpoint(chain, endpoint, index)
 	err := rdb.Set(ctxRedis, key, url, 0).Err()
