@@ -7,6 +7,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+// BroadcastParams represents the parameters for the POST /v2/tx/broadcast endpoint.
 type BroadcastParams struct {
 	// which network should the transaction be broadcasted to
 	Network string `json:"network"`
