@@ -7,8 +7,6 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-const NODE_ENDPOINT = "http://localhost:1317/cosmos/tx/v1beta1/txs"
-
 type BroadcastParams struct {
 	// which network should the transaction be broadcasted to
 	Network string `json:"network"`
@@ -56,7 +54,7 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 
 	jsonTxRequest, err := json.Marshal(txRequest)
 	if err != nil {
-		ctx.Logger().Printf("Error marshalling txRequest: %s", err.Error())
+		ctx.Logger().Printf("Error marshaling txRequest: %s", err.Error())
 		sendInternalErrorResponse(ctx)
 		return
 	}
@@ -76,5 +74,4 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 	}
 
 	sendSuccessfulJSONResponse(ctx, txResponse)
-	return
 }

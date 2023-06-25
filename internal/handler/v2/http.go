@@ -14,7 +14,7 @@ type RestClient struct {
 }
 
 func NewRestClient(network string) (*RestClient, error) {
-	apiAddress, err := getApiAddress(network)
+	apiAddress, err := getAPIAddress(network)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting api address from redis: %w", err)
 	}
@@ -23,7 +23,7 @@ func NewRestClient(network string) (*RestClient, error) {
 	}, nil
 }
 
-func getApiAddress(network string) (string, error) {
+func getAPIAddress(_ string) (string, error) {
 	// TODO: implement query to get domain from redis or decide what do to do from now on
 	return "http://localhost:1317", nil
 }
@@ -32,9 +32,9 @@ func getApiAddress(network string) (string, error) {
 // An error is returned if the request or reading the body fails.
 func (c *RestClient) post(url string, body []byte) ([]byte, error) {
 	// join the node's address with the endpoint's path
-	queryUrl := fmt.Sprintf("%s/%s", c.apiAddress, url)
+	queryURL := fmt.Sprintf("%s/%s", c.apiAddress, url)
 
-	res, err := http.Post(queryUrl, "application/json", bytes.NewBuffer(body)) // nolint:gosec
+	res, err := http.Post(queryURL, "application/json", bytes.NewBuffer(body)) //nolint:gosec
 	if err != nil {
 		return nil, fmt.Errorf("error while sending post request: %w", err)
 	}
@@ -49,6 +49,8 @@ func (c *RestClient) post(url string, body []byte) ([]byte, error) {
 	return bz, nil
 }
 
+// BroadcastTx broadcasts transaction bytes to a Tendermint node
+// synchronously through the REST API.
 func (c *RestClient) BroadcastTx(txBytes []byte) (tx.BroadcastTxResponse, error) {
 	broadcastTxEndpoint := "cosmos/tx/v1beta1/txs"
 	postResponse, err := c.post(broadcastTxEndpoint, txBytes)

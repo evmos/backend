@@ -24,6 +24,11 @@ func sendSuccessfulJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) 
 }
 
 // --- Error Responses ---
+// Whenever the response is an error, any HTTP code that is not 200,
+// we send a JSON response with the following format:
+// {
+//   "error": "error message"
+// }
 
 type ErrorResponse struct {
 	Error string `json:"error"`

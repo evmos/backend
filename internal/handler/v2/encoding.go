@@ -30,4 +30,3 @@ func MakeEncodingConfig() params.EncodingConfig {
 	mb.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	return encodingConfig
 }
-

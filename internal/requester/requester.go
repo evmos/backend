@@ -127,7 +127,7 @@ func makePostRequestInternal(chain string, endpointType string, url string, para
 		// We are using the best bd endpoint as index 0
 		// Right now they only support web3
 		i = 0
-      }
+	}
 
 	for i < 4 {
 		endpoint, err := db.RedisGetEndpoint(chain, endpointType, strconv.FormatInt(int64(i), 10))
