@@ -12,6 +12,8 @@ type Client struct {
 }
 
 // NewClient returns a new instance of a RestClient.
+// It takes a network string as an argument, which is used to query a valid API address from redis
+// for the desired network.
 func NewClient(network string) (*Client, error) {
 	apiAddress, err := getAPIAddress(network)
 	if err != nil {
