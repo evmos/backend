@@ -3,12 +3,15 @@ package v2
 import (
 	"encoding/json"
 
+	"github.com/tharsis/dashboard-backend/internal/node/rest"
+
+	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/valyala/fasthttp"
 )
 
-// BroadcastParams represents the parameters for the POST /v2/tx/broadcast endpoint.
-type BroadcastParams struct {
+// BroadcastTxParams represents the parameters for the POST /v2/tx/broadcast endpoint.
+type BroadcastTxParams struct {
 	// which network should the transaction be broadcasted to
 	Network string `json:"network"`
 	// the signed transaction to be broadcasted
@@ -16,11 +19,11 @@ type BroadcastParams struct {
 }
 
 type BroadcastTxResponse struct {
-	tx.BroadcastTxResponse
+	TxResponse types.TxResponse `json:"tx_response"`
 }
 
 // BroadcastTx handles POST /tx/broadcast.
-// It broadcasts a signed transaction to the specified network.
+// It broadcasts a signed transaction synchronously to the specified network.
 // Returns:
 //
 //	{
@@ -41,7 +44,7 @@ type BroadcastTxResponse struct {
 //	  }
 //	}
 func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
-	reqParams := BroadcastParams{}
+	reqParams := BroadcastTxParams{}
 	if err := json.Unmarshal(ctx.PostBody(), &reqParams); err != nil {
 		ctx.Logger().Printf("Error decoding request body: %s", err.Error())
 		sendBadRequestResponse(ctx, "Invalid request body")
@@ -60,7 +63,7 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	restClient, err := NewRestClient(reqParams.Network)
+	restClient, err := rest.NewClient(reqParams.Network)
 	if err != nil {
 		ctx.Logger().Printf("Error creating rest client: %s", err.Error())
 		sendInternalErrorResponse(ctx)
@@ -74,5 +77,5 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	sendSuccessfulJSONResponse(ctx, txResponse)
+	sendSuccesfulProtoJSONResponse(ctx, &txResponse)
 }
