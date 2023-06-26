@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tharsis/dashboard-backend/internal/db"
-	"github.com/tharsis/dashboard-backend/internal/requester"
-	"github.com/tharsis/dashboard-backend/internal/resources"
+	"github.com/tharsis/dashboard-backend/internal/v1/db"
+	"github.com/tharsis/dashboard-backend/internal/v1/requester"
+	"github.com/tharsis/dashboard-backend/internal/v1/resources"
 )
 
 var running = true

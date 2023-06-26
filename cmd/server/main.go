@@ -9,10 +9,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/tharsis/dashboard-backend/internal/config"
-	"github.com/tharsis/dashboard-backend/internal/rpc"
+	"github.com/tharsis/dashboard-backend/api/config"
+	"github.com/tharsis/dashboard-backend/api"
 
-	"github.com/tharsis/dashboard-backend/internal/metrics"
+	"github.com/tharsis/dashboard-backend/internal/v1/metrics"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	rpcserver := rpc.NewServer(cfg)
+	rpcserver := api.NewServer(cfg)
 	if err = rpcserver.Start(); err != nil {
 		log.Printf("Error starting RPC server: %v\n", err)
 	}

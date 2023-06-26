@@ -14,7 +14,7 @@ import (
 
 	"github.com/tharsis/dashboard-backend/go-crons/endpoints/constants"
 	"github.com/tharsis/dashboard-backend/go-crons/endpoints/models"
-	"github.com/tharsis/dashboard-backend/internal/requester"
+	"github.com/tharsis/dashboard-backend/internal/v1/requester"
 )
 
 var jwg sync.WaitGroup

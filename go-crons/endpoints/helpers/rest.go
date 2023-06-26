@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/tharsis/dashboard-backend/go-crons/endpoints/models"
-	"github.com/tharsis/dashboard-backend/internal/requester"
+	"github.com/tharsis/dashboard-backend/internal/v1/requester"
 )
 
 var rwg sync.WaitGroup
