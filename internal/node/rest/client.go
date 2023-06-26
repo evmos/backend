@@ -92,7 +92,8 @@ func joinURL(baseURL string, queryPath string) string {
 	return u.String()
 }
 
-// getAvailableNodes returns a list of available nodes for the provided network.
+// getAvailableNodes returns a list of available nodes for the provided network
+// from redis.
 func getAvailableNodes(network string) ([]string, error) {
 	// If env variable env == "local" then the only option is localhost
 	env := os.Getenv("ENV")
