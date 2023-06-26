@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tharsis/dashboard-backend/internal/db"
+	"github.com/tharsis/dashboard-backend/internal/v1/db"
 )
 
 type Client struct {

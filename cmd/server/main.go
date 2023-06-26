@@ -9,8 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/tharsis/dashboard-backend/api/config"
 	"github.com/tharsis/dashboard-backend/api"
+	"github.com/tharsis/dashboard-backend/api/config"
 
 	"github.com/tharsis/dashboard-backend/internal/v1/metrics"
 )
