@@ -14,7 +14,7 @@ import (
 // through its REST API.
 func (c *Client) BroadcastTx(txBytes []byte) (tx.BroadcastTxResponse, error) {
 	broadcastTxEndpoint := "cosmos/tx/v1beta1/txs"
-	postResponse, err := c.postRequest(broadcastTxEndpoint, txBytes)
+	postResponse, err := c.post(broadcastTxEndpoint, txBytes)
 	if err != nil {
 		return tx.BroadcastTxResponse{}, err
 	}
