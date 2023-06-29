@@ -114,8 +114,8 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ vars.GCP_REGISTRY }}/public/backend/${{ matrix.component.name }}:${{ github.event.release.tag_name != '' && github.event.release.tag_name || github.sha }}
-            ${{ github.event.release.tag_name == '' && format('{0}/public/backend/{1}:latest', vars.GCP_REGISTRY, matrix.component.name) || '' }}
+            ${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ github.event.repository.name }}/${{ matrix.component.name }}:${{ github.event.release.tag_name != '' && github.event.release.tag_name || github.sha }}
+            ${{ github.event.release.tag_name == '' && format('{0}/${{ vars.GCP_PROJECT }}/${{ github.event.repository.name }}/{1}:latest', vars.GCP_REGISTRY, matrix.component.name) || '' }}
           context: ${{ matrix.component.path }}
           file: ${{ matrix.component.path }}/${{ matrix.component.dockerfile }}
           platforms: linux/amd64
