@@ -97,7 +97,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v4.5.0
         with:
-          images: ${{ env.IMG_NAME }}
+          images: ${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
