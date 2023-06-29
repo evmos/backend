@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	decimal "github.com/cosmos/cosmos-sdk/types"
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/blockchain"
 	"github.com/tharsis/dashboard-backend/internal/constants"
 	"github.com/tharsis/dashboard-backend/internal/db"
@@ -21,11 +20,6 @@ import (
 	"github.com/valyala/fasthttp"
 	"golang.org/x/exp/slices"
 )
-
-func ERC20Balance(ctx *fasthttp.RequestCtx) {
-	val, err := blockchain.GetERC20Balance(paramToString("contract", ctx), paramToString("address", ctx))
-	sendResponse(val, err, ctx)
-}
 
 type Pagination struct {
 	NextKey interface{} `json:"next_key"`
@@ -297,29 +291,4 @@ func ERC20TokensByNameInternal(name string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("invalid token, please try again")
-}
-
-func ERC20Tokens(ctx *fasthttp.RequestCtx) {
-	erc20Tokens, err := resources.GetERC20Tokens()
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	stringRes, err := json.Marshal(erc20Tokens)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	res := "{\"values\":" + string(stringRes) + "}"
-
-	sendResponse(res, nil, ctx)
-}
-
-func AddERC20Routes(r *router.Router) {
-	r.GET("/ERC20Balance/{contract}/{address}", ERC20Balance)
-	r.GET("/ERC20ModuleBalance", ERC20ModuleEmptyBalance)
-	r.GET("/ERC20ModuleBalance/{evmos_address}/{eth_address}", ERC20ModuleBalance)
-	r.GET("/ERC20Tokens", ERC20Tokens)
 }

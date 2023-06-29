@@ -29,7 +29,6 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	tx3 "github.com/cosmos/cosmos-sdk/x/auth/tx"
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/blockchain"
 	"github.com/tharsis/dashboard-backend/internal/constants"
 	"github.com/valyala/fasthttp"
@@ -177,64 +176,6 @@ func GetTransactionBytes(tx blockchain.Transaction, accountNumber uint64, chainI
 	}
 
 	return json.Marshal(txString)
-}
-
-func TransactionWithMessage(ctx *fasthttp.RequestCtx) {
-	m := MessageSendStruct{}
-	if err := json.Unmarshal(ctx.PostBody(), &m); err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	amountInt, ok := sdk.NewIntFromString(m.Message.Amount)
-	if !ok {
-		sendResponse(buildErrorResponse("Invalid amount"), nil, ctx)
-		return
-	}
-	msgSendSdk, err := blockchain.CreateMessageSend(
-		m.Message.Sender,
-		m.Message.Receiver,
-		amountInt,
-		m.Message.Denom,
-		"evmos",
-	)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	amountFeeInt, ok := sdk.NewIntFromString(m.Transaction.Fee)
-	if !ok {
-		sendResponse(buildErrorResponse("Invalid fee amount"), nil, ctx)
-		return
-	}
-
-	var eipEncoding blockchain.EipToSignMsgSend
-	tx, err := blockchain.CreateTransactionWithMessage(
-		eipEncoding,
-		[]sdk.Msg{msgSendSdk},
-		m.Transaction.Memo,
-		amountFeeInt,
-		m.Transaction.Denom,
-		m.Transaction.GasLimit,
-		m.Transaction.PubKey,
-		m.Transaction.Sequence,
-		m.Transaction.AccountNumber,
-		m.Transaction.ChainID,
-		m.Transaction.Sender,
-		"evmos",
-	)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-
-	resultBytes, err := GetTransactionBytes(tx, m.Transaction.AccountNumber, m.Transaction.ChainID, "evmos")
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-	sendResponse(string(resultBytes), err, ctx)
 }
 
 type IBCTransferParams struct {
@@ -1090,19 +1031,4 @@ func CancelUndelegation(ctx *fasthttp.RequestCtx) {
 	}
 
 	createDelegateLikeTransaction(ctx, m.Transaction, []sdk.Msg{cancelUndelegationSDKMsg}, DefaultGas)
-}
-
-func AddTransactionRoutes(r *router.Router) {
-	r.POST("/transactionWithMessage", TransactionWithMessage)
-	r.POST("/broadcastEip712", BroadcastMetamask)
-	r.POST("/ibcTransfer", IBCTransfer)
-	r.POST("/convertCoin", ConvertCoin)
-	r.POST("/convertERC20", ConvertERC20)
-	r.POST("/broadcastAmino", BroadcastAmino)
-	r.POST("/delegate", Delegate)
-	r.POST("/undelegate", Undelegate)
-	r.POST("/redelegate", Redelegate)
-	r.POST("/rewards", Rewards)
-	r.POST("/vote", Vote)
-	r.POST("/cancelUndelegation", CancelUndelegation)
 }

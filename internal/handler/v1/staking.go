@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/blockchain"
 	"github.com/valyala/fasthttp"
 )
@@ -145,9 +144,4 @@ func StakingInfo(ctx *fasthttp.RequestCtx) {
 	}
 
 	sendResponse(string(res), nil, ctx)
-}
-
-func AddStakingRoutes(r *router.Router) {
-	r.GET("/totalStakedByAddress/{address}", TotalStakingByAddress)
-	r.GET("/stakingInfo/{address}", StakingInfo)
 }

@@ -9,20 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fasthttp/router"
 	"github.com/tharsis/dashboard-backend/internal/blockchain"
 	"github.com/tharsis/dashboard-backend/internal/requester"
 	"github.com/valyala/fasthttp"
 )
 
 // Endpoints
-
-func ProposalByID(ctx *fasthttp.RequestCtx) {
-	url := blockchain.GetGovURL(ctx.QueryArgs().Peek("v1"))
-	endpoint := buildThreeParamEndpoint(url+"/proposals/", paramToString("proposal_id", ctx), "?pagination.limit=200")
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
 
 func VoteRecord(ctx *fasthttp.RequestCtx) {
 	url := blockchain.GetGovURL(ctx.QueryArgs().Peek("v1"))
@@ -31,55 +23,9 @@ func VoteRecord(ctx *fasthttp.RequestCtx) {
 	sendResponse(val, err, ctx)
 }
 
-func ProposalTally(ctx *fasthttp.RequestCtx) {
-	url := blockchain.GetGovURL(ctx.QueryArgs().Peek("v1"))
-	endpoint := buildThreeParamEndpoint(url+"/proposals/", paramToString("proposal_id", ctx), "/tally")
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func Proposal(ctx *fasthttp.RequestCtx) {
-	url := blockchain.GetGovURL(ctx.QueryArgs().Peek("v1"))
-	endpoint := BuildTwoParamEndpoint(url+"/proposals/", paramToString("proposal_id", ctx))
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func InflationRate(ctx *fasthttp.RequestCtx) {
-	if err := enforceEvmos(ctx); err == nil {
-		endpoint := "/evmos/inflation/v1/inflation_rate"
-		val, err := getRequestRest(getChain(ctx), endpoint)
-		sendResponse(val, err, ctx)
-	}
-}
-
-func TotalUnclaimed(ctx *fasthttp.RequestCtx) {
-	if err := enforceEvmos(ctx); err == nil {
-		endpoint := "/evmos/claims/v1/total_unclaimed"
-		val, err := getRequestRest(getChain(ctx), endpoint)
-		sendResponse(val, err, ctx)
-	}
-}
-
-func ClaimsParams(ctx *fasthttp.RequestCtx) {
-	if err := enforceEvmos(ctx); err == nil {
-		endpoint := "/evmos/claims/v1/params"
-		val, err := getRequestRest(getChain(ctx), endpoint)
-		sendResponse(val, err, ctx)
-	}
-}
-
 func Epochs(ctx *fasthttp.RequestCtx) {
 	if err := enforceEvmos(ctx); err == nil {
 		endpoint := "/evmos/epochs/v1/epochs"
-		val, err := getRequestRest(getChain(ctx), endpoint)
-		sendResponse(val, err, ctx)
-	}
-}
-
-func InflationSupply(ctx *fasthttp.RequestCtx) {
-	if err := enforceEvmos(ctx); err == nil {
-		endpoint := "/evmos/inflation/v1/circulating_supply"
 		val, err := getRequestRest(getChain(ctx), endpoint)
 		sendResponse(val, err, ctx)
 	}
@@ -101,72 +47,8 @@ func FeeMarketParamsInternal(chain string) (string, error) {
 	return "", fmt.Errorf("network is not Evmos")
 }
 
-func FeeMarketParams(ctx *fasthttp.RequestCtx) {
-	if err := enforceEvmos(ctx); err == nil {
-		val, err := FeeMarketParamsInternal(getChain(ctx))
-		sendResponse(val, err, ctx)
-	}
-}
-
-func ClaimsRecordsByAddress(ctx *fasthttp.RequestCtx) {
-	if err := enforceEvmos(ctx); err == nil {
-		endpoint := BuildTwoParamEndpoint("/evmos/claims/v1/claims_records/", paramToString("address", ctx))
-		val, err := getRequestRest(getChain(ctx), endpoint)
-		sendResponse(val, err, ctx)
-	}
-}
-
-func StakingParams(ctx *fasthttp.RequestCtx) {
-	endpoint := "/cosmos/staking/v1beta1/params"
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func Tallying(ctx *fasthttp.RequestCtx) {
-	url := blockchain.GetGovURL(ctx.QueryArgs().Peek("v1"))
-	endpoint := url + "/params/tallying"
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func IBCClientStates(ctx *fasthttp.RequestCtx) {
-	endpoint := "/ibc/core/client/v1/client_states"
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func StakingRewards(ctx *fasthttp.RequestCtx) {
-	endpoint := buildThreeParamEndpoint("/cosmos/distribution/v1beta1/delegators/", paramToString("address", ctx), "/rewards")
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
 func BalanceByDenom(ctx *fasthttp.RequestCtx) {
 	endpoint := BuildFourParamEndpoint("/cosmos/bank/v1beta1/balances/", paramToString("address", ctx), "/by_denom?denom=", paramToString("denom", ctx))
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func DelegationsByAddress(ctx *fasthttp.RequestCtx) {
-	endpoint := buildThreeParamEndpoint("/cosmos/staking/v1beta1/delegations/", paramToString("address", ctx), "?pagination.limit=200")
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func ValidatorsByAddress(ctx *fasthttp.RequestCtx) {
-	endpoint := buildThreeParamEndpoint("/cosmos/staking/v1beta1/delegators/", paramToString("address", ctx), "/validators")
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func UnbondingByAddress(ctx *fasthttp.RequestCtx) {
-	endpoint := buildThreeParamEndpoint("/cosmos/staking/v1beta1/delegators/", paramToString("address", ctx), "/unbonding_delegations")
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
-func DelegatorInfoByValidator(ctx *fasthttp.RequestCtx) {
-	endpoint := BuildFourParamEndpoint("/cosmos/staking/v1beta1/validators/", paramToString("validator_address", ctx), "/delegations/", paramToString("delegator_address", ctx))
 	val, err := getRequestRest(getChain(ctx), endpoint)
 	sendResponse(val, err, ctx)
 }
@@ -181,18 +63,6 @@ func GetAllValidators(chain string) (string, error) {
 	return getRequestRest(chain, endpoint)
 }
 
-func Validators(ctx *fasthttp.RequestCtx) {
-	val, err := GetValidators(paramToString("validator_status", ctx), getChain(ctx))
-	sendResponse(val, err, ctx)
-}
-
-func Proposals(ctx *fasthttp.RequestCtx) {
-	url := blockchain.GetGovURL(ctx.QueryArgs().Peek("v1"))
-	endpoint := buildThreeParamEndpoint(url+"/proposals?pagination.limit=", paramToString("pagination_limit", ctx), "&pagination.reverse=true")
-	val, err := getRequestRest(getChain(ctx), endpoint)
-	sendResponse(val, err, ctx)
-}
-
 func AccountInternal(address string, chain string) (string, error) {
 	endpoint := BuildTwoParamEndpoint("/cosmos/auth/v1beta1/accounts/", address)
 	val, err := getRequestRest(chain, endpoint)
@@ -202,11 +72,6 @@ func AccountInternal(address string, chain string) (string, error) {
 	return val, nil
 }
 
-func Account(ctx *fasthttp.RequestCtx) {
-	val, err := AccountInternal(paramToString("address", ctx), getChain(ctx))
-	sendResponse(val, err, ctx)
-}
-
 func IBCClientStatusInternal(chain string, clientID string) (string, error) {
 	endpoint := BuildTwoParamEndpoint("/ibc/core/client/v1/client_status/", clientID)
 	val, err := getRequestRest(chain, endpoint)
@@ -214,11 +79,6 @@ func IBCClientStatusInternal(chain string, clientID string) (string, error) {
 		return "", err
 	}
 	return val, nil
-}
-
-func IBCClientStatus(ctx *fasthttp.RequestCtx) {
-	val, err := IBCClientStatusInternal(getChain(ctx), paramToString("client_id", ctx))
-	sendResponse(val, err, ctx)
 }
 
 func TxStatus(ctx *fasthttp.RequestCtx) {
@@ -384,34 +244,4 @@ func Broadcast(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	sendResponse(val, err, ctx)
-}
-
-func AddProxyRoutes(r *router.Router) {
-	r.GET("/ProposalById/{chain}/{proposal_id}", ProposalByID)
-	r.GET("/VoteRecord/{chain}/{proposal_id}/{address}", VoteRecord)
-	r.GET("/ProposalTally/{chain}/{proposal_id}", ProposalTally)
-	r.GET("/Proposal/{chain}/{proposal_id}", Proposal)
-	r.GET("/InflationRate/{chain}", InflationRate)
-	r.GET("/FeeMarketParams/{chain}", FeeMarketParams)
-	r.GET("/ClaimsRecordsByAddress/{chain}/{address}", ClaimsRecordsByAddress)
-	r.GET("/TotalUnclaimed/{chain}", TotalUnclaimed)
-	r.GET("/ClaimsParams/{chain}", ClaimsParams)
-	r.GET("/Epochs/{chain}", Epochs)
-	r.GET("/StakingParams/{chain}", StakingParams)
-	r.GET("/Tallying/{chain}", Tallying)
-	r.GET("/IBCClientStates/{chain}", IBCClientStates)
-	r.GET("/StakingRewards/{chain}/{address}", StakingRewards)
-	r.GET("/BalanceByDenom/{chain}/{address}/{denom:*}", BalanceByDenom)
-	r.GET("/InflationSupply/{chain}", InflationSupply)
-	r.GET("/DelegationsByAddress/{chain}/{address}", DelegationsByAddress)
-	r.GET("/ValidatorsByAddress/{chain}/{address}", ValidatorsByAddress)
-	r.GET("/UnbondingByAddress/{chain}/{address}", UnbondingByAddress)
-	r.GET("/DelegatorInfoByValidator/{chain}/{validator_address}/{delegator_address}", DelegatorInfoByValidator)
-	r.GET("/Validators/{chain}/{validator_status}", Validators)
-	r.GET("/Proposals/{chain}/{pagination_limit}", Proposals)
-	r.GET("/Account/{chain}/{address}", Account)
-	r.GET("/IBCClientStatus/{chain}/{client_id}", IBCClientStatus)
-	r.GET("/TxStatus/{chain}/{tx_hash}", TxStatus)
-	r.POST("/broadcast", Broadcast)
-	r.POST("/simulate", Simulate)
 }
