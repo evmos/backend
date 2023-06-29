@@ -23,11 +23,7 @@ func (h *Handler) RewardsByAddress(ctx *fasthttp.RequestCtx) {
 	address := ctx.UserValue("address").(string)
 	// TODO - validate address before querying numia
 	if address == "" {
-		ctx.SetStatusCode(fasthttp.StatusBadRequest)
-		errorResponse := &ErrorResponse{
-			Error: "Missing address",
-		}
-		sendJSONResponse(ctx, errorResponse)
+		sendBadRequestResponse(ctx, "Missing address in request")
 		return
 	}
 

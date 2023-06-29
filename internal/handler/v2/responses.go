@@ -24,6 +24,11 @@ func sendSuccessfulJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) 
 }
 
 // --- Error Responses ---
+// Whenever the response is an error, any HTTP code that is not 200,
+// we send a JSON response with the following format:
+// {
+//   "error": "error message"
+// }
 
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -34,6 +39,13 @@ type ErrorResponse struct {
 func sendInternalErrorResponse(ctx *fasthttp.RequestCtx) {
 	message := "Something went wrong, please try again later"
 	ctx.SetStatusCode(http.StatusInternalServerError)
+	sendErrorJSONResponse(ctx, message)
+}
+
+// sendBadRequestResponse sends a bad request response to the client.
+// It sets the status code to 400.
+func sendBadRequestResponse(ctx *fasthttp.RequestCtx, message string) {
+	ctx.SetStatusCode(http.StatusBadRequest)
 	sendErrorJSONResponse(ctx, message)
 }
 

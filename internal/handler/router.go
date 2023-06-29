@@ -16,6 +16,9 @@ func (h *Handler) RegisterRoutes(r *router.Router) {
 	r.GET("/v2/rewards/{address}", h.v2.RewardsByAddress)
 	r.GET("/v2/vesting/{address}", h.v2.VestingByAddress)
 
+	// Tx endpoints
+	r.POST("/v2/tx/broadcast", h.v2.BroadcastTx)
+
 	// v1 endpoints to be deprecated
 	// NOTE: v1 endpoints do not have a /v1 prefix for backwards compatibility
 	v1.RegisterRoutes(r)
