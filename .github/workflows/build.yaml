@@ -115,7 +115,7 @@ jobs:
           push: true
           tags: |
             ${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ github.event.repository.name }}/${{ matrix.component.name }}:${{ github.event.release.tag_name != '' && github.event.release.tag_name || github.sha }}
-            ${{ github.event.release.tag_name == '' && "${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ github.event.repository.name }}/${{ matrix.component.name }}:latest" || '' }}
+            ${{ github.event.release.tag_name == '' && format('{0}/{1}/{2}/{3}:latest', vars.GCP_REGISTRY, vars.GCP_PROJECT, github.event.repository.name, matrix.component.name) || '' }}
           context: ${{ matrix.component.path }}
           file: ${{ matrix.component.path }}/${{ matrix.component.dockerfile }}
           platforms: linux/amd64
