@@ -7,9 +7,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/tharsis/dashboard-backend/internal/encoding"
-
-	"github.com/gogo/protobuf/proto"
 	"github.com/valyala/fasthttp"
 )
 
@@ -24,22 +21,6 @@ import (
 func sendSuccessfulJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) {
 	ctx.SetStatusCode(http.StatusOK)
 	sendJSONResponse(ctx, response)
-}
-
-// sendSuccesfulProtoJSONResponse sends a successful JSON response to the client.
-// It encodes
-// It sets the status code to 200.
-func sendSuccesfulProtoJSONResponse(ctx *fasthttp.RequestCtx, response proto.Message) {
-	encConfig := encoding.MakeEncodingConfig()
-	jsonResponse, err := encConfig.Codec.MarshalJSON(response)
-	if err != nil {
-		ctx.Logger().Printf("Error encoding response: %s", err.Error())
-		ctx.SetStatusCode(http.StatusInternalServerError)
-		return
-	}
-	ctx.SetStatusCode(http.StatusOK)
-	ctx.Response.Header.SetContentType("application/json")
-	ctx.SetBody(jsonResponse)
 }
 
 // --- Error Responses ---
