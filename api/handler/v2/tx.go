@@ -5,7 +5,6 @@ import (
 
 	"github.com/tharsis/dashboard-backend/internal/v2/node/rest"
 
-	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/valyala/fasthttp"
 )
@@ -19,7 +18,9 @@ type BroadcastTxParams struct {
 }
 
 type BroadcastTxResponse struct {
-	TxResponse types.TxResponse `json:"tx_response"`
+	Code   uint32 `json:"code"`
+	TxHash string `json:"tx_hash"`
+	RawLog string `json:"raw_log"`
 }
 
 // BroadcastTx handles POST /tx/broadcast.
@@ -27,21 +28,9 @@ type BroadcastTxResponse struct {
 // Returns:
 //
 //	{
-//	  "tx_response": {
-//	    "height": "0",
-//	    "txhash": "3CB7FCC9F5FB31E530CC15665F3FD655AE6CB56CDACAD58D1395C68EDD50D0BB",
-//	    "codespace": "",
-//	    "code": 0,
-//	    "data": "",
-//	    "raw_log": "[]",
-//	    "logs": [],
-//	    "info": "",
-//	    "gas_wanted": "0",
-//	    "gas_used": "0",
-//	    "tx": null,
-//	    "timestamp": "",
-//	    "events": []
-//	  }
+//	  "txhash": "3CB7FCC9F5FB31E530CC15665F3FD655AE6CB56CDACAD58D1395C68EDD50D0BB",
+//	  "code": 0,
+//	  "raw_log": "[]",
 //	}
 func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 	reqParams := BroadcastTxParams{}
@@ -77,5 +66,10 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	sendSuccesfulProtoJSONResponse(ctx, &txResponse)
+	response := BroadcastTxResponse{
+		Code:   txResponse.TxResponse.Code,
+		TxHash: txResponse.TxResponse.TxHash,
+		RawLog: txResponse.TxResponse.RawLog,
+	}
+	sendSuccessfulJSONResponse(ctx, &response)
 }
