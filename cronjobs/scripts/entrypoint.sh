@@ -19,5 +19,4 @@ do
   fi
   sleep 2
 done
-
-python price.py
+python $1.py
