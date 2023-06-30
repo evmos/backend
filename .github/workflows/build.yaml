@@ -65,18 +65,18 @@ jobs:
     strategy:
       matrix:
         component:
-          # - name: "api"
-          #   path: "."
-          #   dockerfile: "dockerfile"
-          #   image_name: "dashboard-backend_api"
+          - name: "api"
+            path: "."
+            dockerfile: "dockerfile"
+            image_name: "dashboard-backend_api"
           - name: "cron"
             path: "./cronjobs"
             dockerfile: "dockerfile"
             image_name: "dashboard-backend_cron"
-          # - name: "nginx"
-          #   path: "./cors"
-          #   dockerfile: "compose.dockerfile"
-          #   image_name: "dashboard-backend_nginx"
+          - name: "nginx"
+            path: "./cors"
+            dockerfile: "compose.dockerfile"
+            image_name: "dashboard-backend_nginx"
     env:
       IMG_NAME: ${{ github.repository }}
     steps:
@@ -142,7 +142,7 @@ jobs:
             -keep=5
             -tag-filter-any=^[a-zA-Z0-9-\.]+$
 
-  update-argo-apps:
+  update-deployment-tags:
     needs: build
     runs-on: ubuntu-latest
     env:
@@ -155,26 +155,24 @@ jobs:
 
       - name: Clone argo-apps repo
         run: |
-          git clone https://x-access-token:${ARGOCD_APPS_TOKEN}@${ARGOCD_APPS_REPO}
+          git clone https://x-access-token:${ARGOCD_APPS_TOKEN}@${ARGOCD_APPS_REPO} APPS
         env:
           ARGOCD_APPS_TOKEN: ${{ secrets.ARGOCD_APPS_TOKEN }}
           ARGOCD_APPS_REPO: ${{ secrets.ARGOCD_APPS_REPO }}
 
       - name: Update k8s deployment
         run: |
-          set -x
-          find ./
-          for filename in build-artifacts/*.txt; do
+          find build-artifacts -name "*.txt" | while read filename; do
             while read line; do
               COMPONENT=$(echo $line | cut -d' ' -f1)
               NEW_IMAGE=$(echo $line | cut -d' ' -f2-)
-              sed -i "s|${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${COMPONENT}:[^ ]*|${NEW_IMAGE}|" argo-apps/apps/backend/staging/k8s_deploy.yaml
+              sed -i "s|${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${COMPONENT}:[^ ]*|${NEW_IMAGE}|" APPS/${{ vars.K8S_MANIFEST }}
             done < $filename
           done
 
       - name: Commit and push if it's necessary
         run: |
-          cd argo-apps
+          cd APPS
           git diff
           git config --global user.email "devops@nowhere.com"
           git config --global user.name "GitHub Action"
