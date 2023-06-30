@@ -16,12 +16,11 @@ import (
 // }
 
 func getNetworkConfigKey() string {
-	var env = os.Getenv("ENVIRONMENT")
+	env := os.Getenv("ENVIRONMENT")
 	if env == "production" {
 		return "prod-git-network-config-directory"
-	} else {
-		return "git-network-config-directory"
 	}
+	return "git-network-config-directory"
 }
 
 func RedisSetNetworkConfig(result string) {

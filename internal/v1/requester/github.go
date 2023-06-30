@@ -103,7 +103,7 @@ func GetValidatorDirectory() ([]File, error) {
 }
 
 func GetERC20TokensDirectory() ([]File, error) {
-	ERC20TokensDirectoryURL := getChainTokenRegistryURL() //nolint:all
+	ERC20TokensDirectoryURL := getChainTokenRegistryURL()
 	return GetJsonsFromFolder(ERC20TokensDirectoryURL, "tokens")
 }
 

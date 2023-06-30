@@ -10,12 +10,11 @@ import (
 )
 
 func getErc20TokensDirectoryKey() string {
-	var env = os.Getenv("ENVIRONMENT")
+	env := os.Getenv("ENVIRONMENT")
 	if env == "production" {
 		return "prod-git-erc20-tokens-directory"
-	} else {
-		return "git-erc20-tokens-directory"
 	}
+	return "git-erc20-tokens-directory"
 }
 
 func buildKeyERC20Balance(chain string, contract string, address string) string {
