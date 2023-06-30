@@ -4,7 +4,7 @@ services:
     build:
       context: ./cronjobs
       dockerfile: dockerfile
-    entrypoint: sh -c "./scripts/endpoint_entrypoint.sh"
+    entrypoint: sh -c "./scripts/entrypoint.sh cron"
     environment:
       - REDIS_HOST=dashboard-backend-redis
       - REDIS_PORT=6379
@@ -16,7 +16,7 @@ services:
     build:
       context: ./cronjobs
       dockerfile: dockerfile
-    entrypoint: sh -c "./scripts/price_entrypoint.sh"
+    entrypoint: sh -c "./scripts/entrypoint.sh price"
     environment:
       - REDIS_HOST=dashboard-backend-redis
       - REDIS_PORT=6379

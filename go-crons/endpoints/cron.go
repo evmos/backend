@@ -10,8 +10,8 @@ import (
 
 	"github.com/tharsis/dashboard-backend/go-crons/endpoints/helpers"
 	"github.com/tharsis/dashboard-backend/go-crons/endpoints/models"
-	"github.com/tharsis/dashboard-backend/internal/db"
-	"github.com/tharsis/dashboard-backend/internal/resources"
+	"github.com/tharsis/dashboard-backend/internal/v1/db"
+	"github.com/tharsis/dashboard-backend/internal/v1/resources"
 )
 
 var (
