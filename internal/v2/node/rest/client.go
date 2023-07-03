@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,8 +14,8 @@ import (
 )
 
 type Client struct {
-	nodes   []string
-	network string
+	nodesEndpoints []string
+	network        string
 }
 
 // NewClient returns a new instance of a RestClient.
@@ -28,8 +27,8 @@ func NewClient(network string) (*Client, error) {
 		return nil, fmt.Errorf("error while getting available endpoints: %w", err)
 	}
 	return &Client{
-		nodes:   nodes,
-		network: network,
+		nodesEndpoints: nodes,
+		network:        network,
 	}, nil
 }
 
@@ -51,15 +50,14 @@ func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
 // postRequestWithRetries performs a POST request to the provided URL with the provided body.
 // It will retry the request with the next available node if the request fails.
 func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Response, error) {
-	maxRetries := len(c.nodes)
 	// TODO: this should be in a config file
 	client := http.Client{
 		Timeout: time.Second * 5,
 	}
 
 	var errorMessages []string
-	for i := 0; i < maxRetries; i++ {
-		queryURL := joinURL(c.nodes[i], endpoint)
+	for i := range c.nodesEndpoints {
+		queryURL := joinURL(c.nodesEndpoints[i], endpoint)
 		resp, err := client.Post(queryURL, "application/json", bytes.NewBuffer(body))
 		if err == nil && resp.StatusCode == http.StatusOK {
 			return resp, nil // success, no need to retry
@@ -67,9 +65,9 @@ func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Res
 
 		// Collect errors in case no endpoint is available
 		if err != nil {
-			errorMessages = append(errorMessages, fmt.Sprintf("node %v error: %v", c.nodes[i], err))
+			errorMessages = append(errorMessages, fmt.Sprintf("node %v error: %v", c.nodesEndpoints[i], err))
 		} else {
-			errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodes[i], resp.StatusCode))
+			errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
 		}
 	}
 
@@ -77,7 +75,7 @@ func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Res
 		"failed to post request at endpoint %v for network %v after %v attempts: %v",
 		endpoint,
 		c.network,
-		maxRetries,
+		len(c.nodesEndpoints),
 		strings.Join(errorMessages, ", "),
 	)
 }
@@ -101,16 +99,10 @@ func getAvailableNodes(network string) ([]string, error) {
 		return []string{"http://localhost:1317"}, nil
 	}
 
-	// In production, query redis for the most up to date rest nodes for the network
-	// TODO: there should be a redis query that returns the array in one request
-	amountOfAvailableNodesPerNetwork := 4
-	nodes := make([]string, amountOfAvailableNodesPerNetwork-1)
-	for i := 1; i <= amountOfAvailableNodesPerNetwork; i++ {
-		endpoint, err := db.RedisGetEndpoint(network, "rest", strconv.Itoa(i))
-		if err != nil {
-			return []string{}, fmt.Errorf("error while getting endpoint %v for network %v from redis: %w", i, network, err)
-		}
-		nodes[i-1] = endpoint
+	endpoints, err := db.RedisGetEndpoints(network, "rest")
+	if err != nil {
+		fmt.Println("error while getting endpoints from redis", err)
 	}
-	return nodes, nil
+
+	return endpoints, nil
 }
