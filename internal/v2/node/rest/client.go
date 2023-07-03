@@ -24,7 +24,7 @@ type Client struct {
 func NewClient(network string) (*Client, error) {
 	nodes, err := getAvailableNodes(network)
 	if err != nil {
-		return nil, fmt.Errorf("error while getting available endpoints: %w", err)
+		return nil, fmt.Errorf("error while getting available endpoints from redis: %w", err)
 	}
 	return &Client{
 		nodesEndpoints: nodes,
@@ -101,7 +101,7 @@ func getAvailableNodes(network string) ([]string, error) {
 
 	endpoints, err := db.RedisGetEndpoints(network, "rest")
 	if err != nil {
-		fmt.Println("error while getting endpoints from redis", err)
+		return nil, err
 	}
 
 	return endpoints, nil
