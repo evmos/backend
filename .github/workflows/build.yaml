@@ -1,0 +1,132 @@
+name: Build and publish Docker images to GCR
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+    branches:
+      - main
+      - production
+  pull_request:
+
+jobs:
+  golangci:
+    name: Run golangci-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Required: setup-go, for all versions v3.0.0+ of golangci-lint
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+          check-latest: true
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - uses: golangci/golangci-lint-action@v3.4.0
+        with:
+          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+          version: latest
+          args: --timeout 10m
+          github-token: ${{ secrets.github_token }}
+        # Check only if there are differences in the source code
+        if: env.GIT_DIFF
+  test-unit:
+    needs: golangci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.19"
+          check-latest: true
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.sol
+            **/**.go
+            go.mod
+            go.sum
+      - name: Test
+        run: |
+          make test
+        if: env.GIT_DIFF
+  build:
+    needs: test-unit
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component:
+          - name: "api"
+            path: "."
+            dockerfile: "dockerfile"
+            image_name: "dashboard-backend_api"
+          - name: "cron"
+            path: "./cronjobs"
+            dockerfile: "dockerfile"
+            image_name: "dashboard-backend_cron"
+          - name: "nginx"
+            path: "./cors"
+            dockerfile: "compose.dockerfile"
+            image_name: "dashboard-backend_nginx"
+    env:
+      IMG_NAME: ${{ github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # - name: Debug
+      #   run: |
+      #     echo "github.ref -> ${{ github.ref }}"
+      # - uses: hmarr/debug-action@v2
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ vars.GCP_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          access_token_lifetime: 600s
+
+      - name: Docker metadata
+        id: metadata
+        uses: docker/metadata-action@v4.5.0
+        with:
+          images: ${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${{ matrix.component.name }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
+          flavor: |
+            latest=${{ github.ref == 'refs/heads/main' }}
+
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      # This avoids using docker/login-action as a middle man.
+      - name: Configure Docker with GCloud credentials
+        shell: bash
+        run: gcloud auth configure-docker --quiet ${{ vars.GCP_REGISTRY}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4.1.0
+        with:
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          context: ${{ matrix.component.path }}
+          file: ${{ matrix.component.path }}/${{ matrix.component.dockerfile }}
+          platforms: linux/amd64
+
+      - name: Clean up old images
+        uses: "docker://europe-docker.pkg.dev/gcr-cleaner/gcr-cleaner/gcr-cleaner-cli"
+        # env:
+        #   GCRCLEANER_LOG: debug
+        with:
+          args: >-
+            -repo=${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${{ matrix.component.name }}
+            -grace=336h
+            -keep=5
+            -tag-filter-any=^[a-zA-Z0-9-\.]+$
