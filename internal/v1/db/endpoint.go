@@ -19,7 +19,28 @@ func buildKeyEndpoint(chain, endpoint, index string) string {
 func RedisGetEndpoint(chain, endpoint, index string) (string, error) {
 	key := buildKeyEndpoint(chain, endpoint, index)
 	val, err := rdb.Get(ctxRedis, key).Result()
-	return formatRedisResponse(val, err)
+	if err != nil {
+		return "", err
+	}
+	return val, nil
+}
+
+func RedisGetEndpoints(chain, serverType string) ([]string, error) {
+	key := buildKeyEndpoint(chain, serverType, "*")
+	keys, _, err := rdb.Scan(ctxRedis, 0, key, int64(0)).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := make([]string, len(keys))
+	for _, key := range keys {
+		rd, err := rdb.Get(ctxRedis, key).Result()
+		if err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, rd)
+	}
+	return nodes, nil
 }
 
 func RedisSetEndpoint(chain, endpoint, index, url string) {
