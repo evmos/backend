@@ -101,7 +101,7 @@ type BroadcastAminoTxParams struct {
 	// which network should the transaction be broadcasted to
 	Network   string                `json:"network"`
 	Signed    legacytx.StdSignDoc   `json:"signed"`
-	Signature legacytx.StdSignature `json:"signature"`
+	Signature legacytx.StdSignature `json:"signature"` //nolint:staticcheck
 }
 
 type BroadcastAminoTxResponse struct {
@@ -176,7 +176,7 @@ func (h *Handler) BroadcastAminoTx(ctx *fasthttp.RequestCtx) {
 // EncodeTransaction encodes the upcoming transaction using the provided configuration.
 // It receives StdSignDoc and StdSignature as input and builds a TxBuilder to generate
 // the broadcast bytes.
-func EncodeTransaction(encConfig *params.EncodingConfig, signDoc legacytx.StdSignDoc, signature legacytx.StdSignature) ([]byte, error) {
+func EncodeTransaction(encConfig *params.EncodingConfig, signDoc legacytx.StdSignDoc, signature legacytx.StdSignature) ([]byte, error) { //nolint:staticcheck
 	txBuilder := encConfig.TxConfig.NewTxBuilder()
 	aminoCodec := encConfig.Amino
 	var fees legacytx.StdFee
