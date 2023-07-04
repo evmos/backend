@@ -8,6 +8,8 @@ on:
       - main
       - production
   pull_request:
+    types:
+      - closed
 
 jobs:
   golangci:
@@ -56,7 +58,7 @@ jobs:
           make test
         if: env.GIT_DIFF
   build:
-    if: github.event.pull_request.merged == true && github.event.pull_request.head.repo.fork == false
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.fork == false
     needs: test-unit
     permissions:
       contents: "read"
