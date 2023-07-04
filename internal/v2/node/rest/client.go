@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -47,6 +48,10 @@ func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
 	return bz, nil
 }
 
+type BadRequestError struct {
+	Message string `json:"message"`
+}
+
 // postRequestWithRetries performs a POST request to the provided URL with the provided body.
 // It will retry the request with the next available node if the request fails.
 func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Response, error) {
@@ -67,7 +72,22 @@ func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Res
 		if err != nil {
 			errorMessages = append(errorMessages, fmt.Sprintf("node %v error: %v", c.nodesEndpoints[i], err))
 		} else {
-			errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
+			if resp.StatusCode == http.StatusBadRequest {
+				defer resp.Body.Close()
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return nil, fmt.Errorf("error reading response body: %w", err)
+				}
+				responseBody := BadRequestError{}
+				err = json.Unmarshal(body, &responseBody)
+				if err != nil {
+					return nil, fmt.Errorf("error unmarshalling response body: %w", err)
+				}
+				errorMessages = append(errorMessages, fmt.Sprintf("node %v status code %v with message: %v", c.nodesEndpoints[i], http.StatusBadRequest, responseBody.Message))
+			} else {
+				errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
+
+			}
 		}
 	}
 

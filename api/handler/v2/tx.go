@@ -2,6 +2,7 @@ package v2
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/tharsis/dashboard-backend/internal/v2/node/rest"
 
@@ -52,6 +53,12 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
+	err = ValidateBroadcastTxParams(&reqParams)
+	if err != nil {
+		sendBadRequestResponse(ctx, err.Error())
+		return
+	}
+
 	restClient, err := rest.NewClient(reqParams.Network)
 	if err != nil {
 		ctx.Logger().Printf("Error creating rest client: %s", err.Error())
@@ -72,4 +79,15 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 		RawLog: txResponse.TxResponse.RawLog,
 	}
 	sendSuccessfulJSONResponse(ctx, &response)
+}
+
+func ValidateBroadcastTxParams(params *BroadcastTxParams) error {
+	// TODO: validate network by checking if it's in the list of available networks
+	if params.Network == "" {
+		return fmt.Errorf("network cannot be empty")
+	}
+	if len(params.TxBytes) == 0 {
+		return fmt.Errorf("tx_bytes cannot be empty")
+	}
+	return nil
 }
