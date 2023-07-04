@@ -3,6 +3,7 @@
 package db
 
 import (
+	"context"
 	"strings"
 )
 
@@ -26,20 +27,22 @@ func RedisGetEndpoint(chain, endpoint, index string) (string, error) {
 }
 
 func RedisGetEndpoints(chain, serverType string) ([]string, error) {
-	key := buildKeyEndpoint(chain, serverType, "*")
-	keys, _, err := rdb.Scan(ctxRedis, 0, key, int64(0)).Result()
-	if err != nil {
-		return nil, err
-	}
-
-	nodes := make([]string, len(keys))
-	for _, key := range keys {
-		rd, err := rdb.Get(ctxRedis, key).Result()
+	ctx := context.Background()
+	match := buildKeyEndpoint(chain, serverType, "*")
+	iter := rdb.Scan(ctx, 0, match, 0).Iterator()
+	var nodes []string
+	for iter.Next(ctx) {
+		rd, err := rdb.Get(ctx, iter.Val()).Result()
 		if err != nil {
 			return nil, err
 		}
 		nodes = append(nodes, rd)
 	}
+
+	if err := iter.Err(); err != nil {
+		return nil, err
+	}
+
 	return nodes, nil
 }
 
