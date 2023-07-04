@@ -56,6 +56,7 @@ jobs:
           make test
         if: env.GIT_DIFF
   build:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.repo.fork == false
     needs: test-unit
     permissions:
       contents: "read"
@@ -120,6 +121,16 @@ jobs:
           file: ${{ matrix.component.path }}/${{ matrix.component.dockerfile }}
           platforms: linux/amd64
 
+      - name: Write image tag to file
+        run: |
+          echo "${{ matrix.component.name }} ${{ steps.metadata.outputs.tags }}" >> metadata-${{ matrix.component.name }}.txt
+
+      - name: Upload image tags
+        uses: actions/upload-artifact@v2
+        with:
+          name: image-tag-${{ matrix.component.name }}
+          path: metadata-${{ matrix.component.name }}.txt
+
       - name: Clean up old images
         uses: "docker://europe-docker.pkg.dev/gcr-cleaner/gcr-cleaner/gcr-cleaner-cli"
         # env:
@@ -130,3 +141,40 @@ jobs:
             -grace=336h
             -keep=5
             -tag-filter-any=^[a-zA-Z0-9-\.]+$
+
+  update-deployment-tags:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      IMG_NAME: ${{ github.repository }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: build-artifacts
+
+      - name: Clone argo-apps repo
+        run: |
+          git clone https://x-access-token:${ARGOCD_APPS_TOKEN}@${ARGOCD_APPS_REPO} APPS
+        env:
+          ARGOCD_APPS_TOKEN: ${{ secrets.ARGOCD_APPS_TOKEN }}
+          ARGOCD_APPS_REPO: ${{ secrets.ARGOCD_APPS_REPO }}
+
+      - name: Update k8s deployment
+        run: |
+          find build-artifacts -name "*.txt" | while read filename; do
+            while read line; do
+              COMPONENT=$(echo $line | cut -d' ' -f1)
+              NEW_IMAGE=$(echo $line | cut -d' ' -f2-)
+              sed -i "s|${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${COMPONENT}:[^ ]*|${NEW_IMAGE}|" APPS/${{ vars.K8S_MANIFEST }}
+            done < $filename
+          done
+
+      - name: Commit and push if it's necessary
+        run: |
+          cd APPS
+          git diff
+          git config --global user.email "devops@nowhere.com"
+          git config --global user.name "GitHub Action"
+          git commit -am "Update tags (pipeline #${{ github.run_number }})" || echo "No changes to commit"
+          git push

@@ -72,21 +72,7 @@ func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Res
 		if err != nil {
 			errorMessages = append(errorMessages, fmt.Sprintf("node %v error: %v", c.nodesEndpoints[i], err))
 		} else {
-			if resp.StatusCode == http.StatusBadRequest {
-				defer resp.Body.Close()
-				body, err := io.ReadAll(resp.Body)
-				if err != nil {
-					return nil, fmt.Errorf("error reading response body: %w", err)
-				}
-				responseBody := BadRequestError{}
-				err = json.Unmarshal(body, &responseBody)
-				if err != nil {
-					return nil, fmt.Errorf("error unmarshalling response body: %w", err)
-				}
-				errorMessages = append(errorMessages, fmt.Sprintf("node %v status code %v with message: %v", c.nodesEndpoints[i], http.StatusBadRequest, responseBody.Message))
-			} else {
-				errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
-			}
+			errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
 		}
 	}
 
