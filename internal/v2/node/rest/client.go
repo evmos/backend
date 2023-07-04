@@ -86,7 +86,6 @@ func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Res
 				errorMessages = append(errorMessages, fmt.Sprintf("node %v status code %v with message: %v", c.nodesEndpoints[i], http.StatusBadRequest, responseBody.Message))
 			} else {
 				errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
-
 			}
 		}
 	}

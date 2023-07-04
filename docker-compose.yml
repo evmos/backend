@@ -10,7 +10,7 @@ services:
       - REDIS_HOST=dashboard-backend-redis
       - REDIS_PORT=6379
       - ENV=DEV
-      - GITHUB_KEY=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
+      - GITHUB_KEY
       - ENVIRONMENT=staging
     depends_on:
       - dashboard-backend-redis
@@ -24,8 +24,8 @@ services:
       - REDIS_HOST=dashboard-backend-redis
       - REDIS_PORT=6379
       - ENV=DEV
-      - GITHUB_KEY=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
-      - ENVIRONMENT=staging
+      - GITHUB_KEY
+      - ENVIRONMENT
     depends_on:
       - dashboard-backend-redis
   dashboard-backend-api:
@@ -35,9 +35,9 @@ services:
       dockerfile: dockerfile
     environment:
       - REDIS_HOST=dashboard-backend-redis
-      - NUMIA_API_KEY=sk_5a0bd313d7604e9eb1fe19c589a44d37
-      - NUMIA_RPC_ENDPOINT=https://evmos.numia.xyz
-      - GITHUB_KEY=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
+      - NUMIA_API_KEY
+      - NUMIA_RPC_ENDPOINT
+      - GITHUB_KEY
       - ENVIRONMENT=staging
     depends_on:
       - dashboard-backend-redis
