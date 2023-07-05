@@ -132,7 +132,7 @@ func (h *Handler) BroadcastAminoTx(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	txBytes, err := EncodeTransaction(&protoCfg, reqParams.Signed, reqParams.Signature)
+	txBytes, err := EncodeLegacyTransaction(&protoCfg, reqParams.Signed, reqParams.Signature)
 	if err != nil {
 		ctx.Logger().Printf("Error generating tx bytes: %s", err.Error())
 		sendInternalErrorResponse(ctx)
@@ -173,10 +173,10 @@ func (h *Handler) BroadcastAminoTx(ctx *fasthttp.RequestCtx) {
 	sendSuccessfulJSONResponse(ctx, &response)
 }
 
-// EncodeTransaction encodes the upcoming transaction using the provided configuration.
+// EncodeLegacyTransaction encodes the upcoming transaction using the provided configuration.
 // It receives StdSignDoc and StdSignature as input and builds a TxBuilder to generate
 // the broadcast bytes.
-func EncodeTransaction(encConfig *params.EncodingConfig, signDoc legacytx.StdSignDoc, signature legacytx.StdSignature) ([]byte, error) { //nolint:staticcheck
+func EncodeLegacyTransaction(encConfig *params.EncodingConfig, signDoc legacytx.StdSignDoc, signature legacytx.StdSignature) ([]byte, error) { //nolint:staticcheck
 	txBuilder := encConfig.TxConfig.NewTxBuilder()
 	aminoCodec := encConfig.Amino
 	var fees legacytx.StdFee
