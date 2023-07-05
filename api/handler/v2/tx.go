@@ -85,6 +85,7 @@ func (h *Handler) BroadcastTx(ctx *fasthttp.RequestCtx) {
 	sendSuccessfulJSONResponse(ctx, &response)
 }
 
+// ValidateBroadcastTxParams validates the parameters for the POST /v2/tx/broadcast endpoint.
 func ValidateBroadcastTxParams(params *BroadcastTxParams) error {
 	// TODO: validate network by checking if it's in the list of available networks
 	if params.Network == "" {
