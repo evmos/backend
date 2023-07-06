@@ -1,6 +1,7 @@
 version: "3.2"
 services:
   cron:
+    container_name: cronjobs
     build:
       context: ./cronjobs
       dockerfile: dockerfile
@@ -9,10 +10,12 @@ services:
       - REDIS_HOST=dashboard-backend-redis
       - REDIS_PORT=6379
       - ENV=DEV
+      - GITHUB_KEY
+      - ENVIRONMENT=staging
     depends_on:
       - dashboard-backend-redis
-
   price:
+    container_name: price
     build:
       context: ./cronjobs
       dockerfile: dockerfile
@@ -21,19 +24,23 @@ services:
       - REDIS_HOST=dashboard-backend-redis
       - REDIS_PORT=6379
       - ENV=DEV
+      - GITHUB_KEY
+      - ENVIRONMENT
     depends_on:
       - dashboard-backend-redis
-
   dashboard-backend-api:
+    container_name: backend
     build:
       context: .
       dockerfile: dockerfile
     environment:
       - REDIS_HOST=dashboard-backend-redis
+      - NUMIA_API_KEY
+      - NUMIA_RPC_ENDPOINT
+      - GITHUB_KEY
+      - ENVIRONMENT=staging
     depends_on:
-      - price
-      - cron
-
+      - dashboard-backend-redis
   nginx:
     container_name: nginx
     build:
@@ -43,11 +50,9 @@ services:
       - dashboard-backend-api
     ports:
       - "80:80"
-
   dashboard-backend-redis:
     image: redis
     ports:
       - "6379:6379"
-
 volumes:
   app-volume:

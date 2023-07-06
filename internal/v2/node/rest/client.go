@@ -47,6 +47,10 @@ func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
 	return bz, nil
 }
 
+type BadRequestError struct {
+	Message string `json:"message"`
+}
+
 // postRequestWithRetries performs a POST request to the provided URL with the provided body.
 // It will retry the request with the next available node if the request fails.
 func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Response, error) {
