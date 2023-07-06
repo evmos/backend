@@ -22,7 +22,23 @@ type BroadcastTxParams struct {
 	TxBytes []byte `json:"tx_bytes"`
 }
 
+// BroadcastTxResponse represents the response for the POST /v2/tx/broadcast endpoint.
 type BroadcastTxResponse struct {
+	Code   uint32 `json:"code"`
+	TxHash string `json:"tx_hash"`
+	RawLog string `json:"raw_log"`
+}
+
+// BroadcastTxParams represents the parameters for the POST /v2/tx/broadcast endpoint.
+type BroadcastAminoTxParams struct {
+	// which network should the transaction be broadcasted to
+	Network   string                `json:"network"`
+	Signed    legacytx.StdSignDoc   `json:"signed"`
+	Signature legacytx.StdSignature `json:"signature"` //nolint:staticcheck
+}
+
+// BroadcastTxResponse represents the response for the POST /v2/tx/amion/broadcast endpoint.
+type BroadcastAminoTxResponse struct {
 	Code   uint32 `json:"code"`
 	TxHash string `json:"tx_hash"`
 	RawLog string `json:"raw_log"`
@@ -95,20 +111,6 @@ func ValidateBroadcastTxParams(params *BroadcastTxParams) error {
 		return fmt.Errorf("tx_bytes cannot be empty")
 	}
 	return nil
-}
-
-// BroadcastTxParams represents the parameters for the POST /v2/tx/broadcast endpoint.
-type BroadcastAminoTxParams struct {
-	// which network should the transaction be broadcasted to
-	Network   string                `json:"network"`
-	Signed    legacytx.StdSignDoc   `json:"signed"`
-	Signature legacytx.StdSignature `json:"signature"` //nolint:staticcheck
-}
-
-type BroadcastAminoTxResponse struct {
-	Code   uint32 `json:"code"`
-	TxHash string `json:"tx_hash"`
-	RawLog string `json:"raw_log"`
 }
 
 // BroadcastAminoTx handles POST /tx/amino/broadcast.
