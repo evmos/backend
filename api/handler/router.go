@@ -18,6 +18,7 @@ func (h *Handler) RegisterRoutes(r *router.Router) {
 
 	// Tx endpoints
 	r.POST("/v2/tx/broadcast", h.v2.BroadcastTx)
+	r.POST("/v2/tx/amino/broadcast", h.v2.BroadcastAminoTx)
 
 	// v1 endpoints to be deprecated
 	// NOTE: v1 endpoints do not have a /v1 prefix for backwards compatibility

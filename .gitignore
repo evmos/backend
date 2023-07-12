@@ -1,2 +1,4 @@
 go-backend
 dashboard-backend
+.env
+server
