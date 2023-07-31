@@ -33,8 +33,6 @@ func RegisterRoutes(r *router.Router) {
 	// tx
 	r.GET("/isIBCExecuted/{tx_hash}/{chain}", isIBCExecuted)
 	r.POST("/broadcastEip712", BroadcastMetamask)
-	r.POST("/broadcastAmino", BroadcastAmino)
-	r.POST("/broadcast", Broadcast)
 	r.POST("/simulate", Simulate)
 	r.GET("/TxStatus/{chain}/{tx_hash}", TxStatus)
 

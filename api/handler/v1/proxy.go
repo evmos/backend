@@ -87,12 +87,6 @@ func TxStatus(ctx *fasthttp.RequestCtx) {
 	sendResponse(val, err, ctx)
 }
 
-type broadcastParams struct {
-	Network string  `json:"network"`
-	TxBytes []uint8 `json:"txBytes"`
-	Sender  string  `json:"sender"`
-}
-
 type simulateParams struct {
 	Network string  `json:"network"`
 	TxBytes []uint8 `json:"txBytes"`
@@ -230,18 +224,4 @@ func broadcastInternal(bytes []byte, network string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("invalid transaction response")
-}
-
-func Broadcast(ctx *fasthttp.RequestCtx) {
-	m := broadcastParams{}
-	if err := json.Unmarshal(ctx.PostBody(), &m); err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-	val, err := broadcastInternal(m.TxBytes, m.Network)
-	if err != nil {
-		sendResponse("", err, ctx)
-		return
-	}
-	sendResponse(val, err, ctx)
 }
