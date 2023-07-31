@@ -87,12 +87,6 @@ func TxStatus(ctx *fasthttp.RequestCtx) {
 	sendResponse(val, err, ctx)
 }
 
-type broadcastParams struct {
-	Network string  `json:"network"`
-	TxBytes []uint8 `json:"txBytes"`
-	Sender  string  `json:"sender"`
-}
-
 type simulateParams struct {
 	Network string  `json:"network"`
 	TxBytes []uint8 `json:"txBytes"`
