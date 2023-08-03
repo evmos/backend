@@ -22,8 +22,10 @@ else:
     r = redis.Redis(decode_responses=True)
 
 
-erc20TokensDirectoryKey = "prod-git-erc20-tokens-directory" if ENVIRONMENT == "production" else "git-erc20-tokens-directory"
-networkConfig = "prod-git-network-config-directory" if ENVIRONMENT == "production" else "git-network-config-directory"
+prod_prefix = "prod-" if ENVIRONMENT == "production" else ""
+
+erc20TokensDirectoryKey = f"{prod_prefix}git-erc20-tokens-directory"
+networkConfig = f"{prod_prefix}git-network-config-directory"
 
 
 def redisSetPrice(asset: str, vs_currency: str, price: float):
