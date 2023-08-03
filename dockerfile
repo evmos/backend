@@ -1,4 +1,4 @@
-FROM golang:1.19.0-bullseye
+FROM golang:1.21rc3-bullseye
 
 WORKDIR /go/src/
 COPY . .
