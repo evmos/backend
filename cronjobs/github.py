@@ -10,7 +10,7 @@ from redis_functions import getChains, getTokens, setChains, setTokens
 
 ENVIRONMENT = os.getenv("ENVIRONMENT")
 
-CHAINS_DIRECTORY_URL = "https://api.github.com/repos/evmos/chain-token-registry/git/trees/production?recursive=1" if ENVIRONMENT == "production" else "https://api.github.com/repos/evmos/chain-token-registry/git/trees/main?recursive=1"
+CHAINS_DIRECTORY_URL = f"https://api.github.com/repos/evmos/chain-token-registry/git/trees/{ENVIRONMENT if ENVIRONMENT == 'production' else 'main'}?recursive=1"
 
 PAT = os.getenv("GITHUB_KEY")
 if not PAT:
