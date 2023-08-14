@@ -4,11 +4,30 @@
 package db
 
 import (
+	"fmt"
+	"os"
 	"strings"
 	"time"
 )
 
-var erc20TokensDirectoryKey = "git-erc20-tokens-directory" //nolint:gosec
+// erc20TokensDirectoryKey represents the Redis key for the ERC20 tokens directory
+var erc20TokensDirectoryKey string
+
+func init() {
+	erc20TokensDirectoryKey = getErc20TokensDirectoryKey()
+}
+
+func getErc20TokensDirectoryKey() string {
+	env := os.Getenv("ENVIRONMENT")
+	if env == "production" {
+		return "prod-git-erc20-tokens-directory"
+	}
+	return "git-erc20-tokens-directory"
+}
+
+func getErc20TokensDirectoryKeyByName(name string) string {
+	return fmt.Sprintf("%s-%s", erc20TokensDirectoryKey, name)
+}
 
 func buildKeyERC20Balance(chain string, contract string, address string) string {
 	var sb strings.Builder
@@ -46,13 +65,15 @@ func RedisGetERC20TokensDirectory() (string, error) {
 }
 
 func RedisSetERC20TokensByName(name string, result string) {
-	err := rdb.Set(ctxRedis, networkConfig+name, result, time.Duration(expiration*int(time.Second))).Err()
+	key := getErc20TokensDirectoryKeyByName(name)
+	err := rdb.Set(ctxRedis, key, result, time.Duration(expiration*int(time.Second))).Err()
 	if err != nil {
 		panic(err)
 	}
 }
 
 func RedisGetERC20TokensByName(name string) (string, error) {
-	val, err := rdb.Get(ctxRedis, networkConfig+name).Result()
+	key := getErc20TokensDirectoryKeyByName(name)
+	val, err := rdb.Get(ctxRedis, key).Result()
 	return formatRedisResponse(val, err)
 }

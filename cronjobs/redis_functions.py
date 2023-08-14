@@ -12,6 +12,8 @@ REDIS_HOST = os.getenv('REDIS_HOST', None)
 REDIS_PORT = os.getenv('REDIS_PORT', 6379)
 SECONDS_PER_HOUR = 3600
 
+ENVIRONMENT = os.getenv("ENVIRONMENT")
+
 
 if REDIS_HOST:
     r = redis.Redis(host=REDIS_HOST, port=int(
@@ -20,8 +22,10 @@ else:
     r = redis.Redis(decode_responses=True)
 
 
-erc20TokensDirectoryKey = "git-erc20-tokens-directory"
-networkConfig = "git-network-config-directory"
+prod_prefix = "prod-" if ENVIRONMENT == "production" else ""
+
+erc20TokensDirectoryKey = f"{prod_prefix}git-erc20-tokens-directory"
+networkConfig = f"{prod_prefix}git-network-config-directory"
 
 
 def redisSetPrice(asset: str, vs_currency: str, price: float):
