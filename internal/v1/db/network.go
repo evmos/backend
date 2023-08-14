@@ -9,14 +9,6 @@ import (
 	"time"
 )
 
-//	func buildNetwokrKey(url string) string {
-//		var sb strings.Builder
-//		sb.WriteString("githubcache")
-//		sb.WriteString(url)
-//		return sb.String()
-//	}
-//
-
 // networkConfigKey represents the Redis key for the network config
 var networkConfigKey string
 
