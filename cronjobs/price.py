@@ -11,12 +11,22 @@ from helpers import get_erc20_coins
 from redis_functions import redisSetPrice
 
 
-def get_price(asset: str, vs_currency: str) -> float | None:
+def get_dex_screener_price():
+    # Used only for evmos at the moment
+    url = "https://api.dexscreener.com/latest/dex/pairs/evmos/0xaea12f0b3b609811a0dc28dc02716c60d534f972"
+    resp = requests.get(url)
+    return float(resp.json().get("pair", {}).get("priceUsd", "0.0"))
+
+def get_price(asset: str, vs_currency: str):
     try:
-        url = 'https://api.coingecko.com/api/v3/simple/price?'
-        resp = requests.get(f'{url}ids={asset}&vs_currencies={vs_currency}')
-        print(resp)
-        return float(resp.json()[asset][vs_currency])
+        if asset == "evmos":
+            price = get_dex_screener_price()
+            return price
+        else:
+            url = 'https://api.coingecko.com/api/v3/simple/price?'
+            resp = requests.get(f'{url}ids={asset}&vs_currencies={vs_currency}')
+            print(resp)
+            return float(resp.json()[asset][vs_currency])
     except Exception:
         return None
 
@@ -28,7 +38,7 @@ def process_assets(erc20_module_coins):
         if price is not None:
             redisSetPrice(coin['coingeckoId'], 'usd', price)
             print(f'Price {price} for {coin["tokenName"]}')
-        time.sleep(2)
+        time.sleep(10)
 
 
 running = True
@@ -41,7 +51,7 @@ def main():
         erc20_module_coins = get_erc20_coins(tracked_tokens)
         print('Getting prices...')
         process_assets(erc20_module_coins)
-        time.sleep(5)
+        time.sleep(300)
 
 
 def signal_handler(sig, frame):
