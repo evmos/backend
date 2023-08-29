@@ -47,6 +47,54 @@ func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
 	return bz, nil
 }
 
+// get defines a wrapper around an HTTP GET request with a provided URL.
+// An error is returned if the request or reading the body fails.
+func (c *Client) Get(endpoint string) ([]byte, error) {
+	res, err := c.getRequestWithRetries(endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("error while making get request: %w", err)
+	}
+
+	bz, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	return bz, nil
+}
+
+// getRequestWithRetries performs a GET request to the provided URL.
+// It will retry the request with the next available node if the request fails.
+func (c *Client) getRequestWithRetries(endpoint string) (*http.Response, error) {
+	// TODO: this should be in a config file
+	client := http.Client{
+		Timeout: time.Second * 5,
+	}
+
+	var errorMessages []string
+	for i := range c.nodesEndpoints {
+		queryURL := joinURL(c.nodesEndpoints[i], endpoint)
+		resp, err := client.Get(queryURL)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			return resp, nil // success, no need to retry
+		}
+
+		// Collect errors in case no endpoint is available
+		if err != nil {
+			errorMessages = append(errorMessages, fmt.Sprintf("node %v error: %v", c.nodesEndpoints[i], err))
+		} else {
+			errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
+		}
+	}
+
+	return nil, fmt.Errorf(
+		"failed to get request at endpoint %v for network %v after %v attempts: %v",
+		endpoint,
+		c.network,
+		len(c.nodesEndpoints),
+		strings.Join(errorMessages, ", "),
+	)
+}
+
 type BadRequestError struct {
 	Message string `json:"message"`
 }
