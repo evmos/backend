@@ -31,29 +31,26 @@ type VestingByAddressResponse struct {
 }
 
 func (c *Client) GetVestingAccount(address string) (VestingByAddressResponse, error) {
-	accountRes, err := c.Get("/cosmos/auth/v1beta1/accounts/" + address)
-
+	accountRes, err := c.get("/cosmos/auth/v1beta1/accounts/" + address)
 	if err != nil {
-		return VestingByAddressResponse{}, fmt.Errorf("error querying vesting account from RPC: %s", err.Error())
+		return VestingByAddressResponse{}, fmt.Errorf("Error querying vesting account from RPC: %s", err.Error())
 	}
 
 	var account VestingAccount
-
 	err = json.Unmarshal(accountRes, &account)
 	if err != nil {
-		return VestingByAddressResponse{}, fmt.Errorf("error decoding vesting account: %s", err.Error())
+		return VestingByAddressResponse{}, fmt.Errorf("Error decoding vesting account: %s", err.Error())
 	}
 
-	rewardsRes, err := c.Get("/evmos/vesting/v1/balances/" + address)
-
+	rewardsRes, err := c.get("/evmos/vesting/v1/balances/" + address)
 	if err != nil {
-		return VestingByAddressResponse{}, fmt.Errorf("error querying vesting balance from RPC: %s", err.Error())
+		return VestingByAddressResponse{}, fmt.Errorf("Error querying vesting balance from RPC: %s", err.Error())
 	}
 
 	var vestingBalance types.QueryBalancesResponse
 	err = json.Unmarshal(rewardsRes, &vestingBalance)
 	if err != nil {
-		return VestingByAddressResponse{}, fmt.Errorf("error decoding vesting account: %s", err.Error())
+		return VestingByAddressResponse{}, fmt.Errorf("Error decoding vesting account: %s", err.Error())
 	}
 
 	res := VestingByAddressResponse{

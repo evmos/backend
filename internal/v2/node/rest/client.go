@@ -49,7 +49,7 @@ func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
 
 // get defines a wrapper around an HTTP GET request with a provided URL.
 // An error is returned if the request or reading the body fails.
-func (c *Client) Get(endpoint string) ([]byte, error) {
+func (c *Client) get(endpoint string) ([]byte, error) {
 	res, err := c.requestWithRetries("GET", endpoint, []byte{})
 	if err != nil {
 		return nil, fmt.Errorf("error while making get request: %w", err)

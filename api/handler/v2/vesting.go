@@ -89,7 +89,6 @@ func (h *Handler) VestingByAddress(ctx *fasthttp.RequestCtx) {
 	}
 
 	res, err := restClient.GetVestingAccount(address)
-
 	if err != nil {
 		ctx.Logger().Printf("Error getting vesting account: %s", err.Error())
 		sendInternalErrorResponse(ctx)

@@ -23,7 +23,7 @@ func (c *Client) BroadcastTx(txBytes []byte) (tx.BroadcastTxResponse, error) {
 	jsonResponse := tx.BroadcastTxResponse{}
 	err = encConfig.Codec.UnmarshalJSON(postResponse, &jsonResponse)
 	if err != nil {
-		return tx.BroadcastTxResponse{}, fmt.Errorf("error while unmarshalling response body: %w", err)
+		return tx.BroadcastTxResponse{}, fmt.Errorf("Error while unmarshalling response body: %w", err)
 	}
 	return jsonResponse, nil
 }
