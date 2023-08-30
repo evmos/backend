@@ -35,7 +35,7 @@ func NewClient(network string) (*Client, error) {
 // post defines a wrapper around an HTTP POST request with a provided URL and body.
 // An error is returned if the request or reading the body fails.
 func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
-	res, err := c.postRequestWithRetries(endpoint, body)
+	res, err := c.requestWithRetries("POST", endpoint, body)
 	if err != nil {
 		return nil, fmt.Errorf("error while making post request: %w", err)
 	}
@@ -50,7 +50,7 @@ func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
 // get defines a wrapper around an HTTP GET request with a provided URL.
 // An error is returned if the request or reading the body fails.
 func (c *Client) Get(endpoint string) ([]byte, error) {
-	res, err := c.getRequestWithRetries(endpoint)
+	res, err := c.requestWithRetries("GET", endpoint, []byte{})
 	if err != nil {
 		return nil, fmt.Errorf("error while making get request: %w", err)
 	}
@@ -62,46 +62,13 @@ func (c *Client) Get(endpoint string) ([]byte, error) {
 	return bz, nil
 }
 
-// getRequestWithRetries performs a GET request to the provided URL.
-// It will retry the request with the next available node if the request fails.
-func (c *Client) getRequestWithRetries(endpoint string) (*http.Response, error) {
-	// TODO: this should be in a config file
-	client := http.Client{
-		Timeout: time.Second * 5,
-	}
-
-	var errorMessages []string
-	for i := range c.nodesEndpoints {
-		queryURL := joinURL(c.nodesEndpoints[i], endpoint)
-		resp, err := client.Get(queryURL)
-		if err == nil && resp.StatusCode == http.StatusOK {
-			return resp, nil // success, no need to retry
-		}
-
-		// Collect errors in case no endpoint is available
-		if err != nil {
-			errorMessages = append(errorMessages, fmt.Sprintf("node %v error: %v", c.nodesEndpoints[i], err))
-		} else {
-			errorMessages = append(errorMessages, fmt.Sprintf("node %v status code: %v", c.nodesEndpoints[i], resp.StatusCode))
-		}
-	}
-
-	return nil, fmt.Errorf(
-		"failed to get request at endpoint %v for network %v after %v attempts: %v",
-		endpoint,
-		c.network,
-		len(c.nodesEndpoints),
-		strings.Join(errorMessages, ", "),
-	)
-}
-
 type BadRequestError struct {
 	Message string `json:"message"`
 }
 
 // postRequestWithRetries performs a POST request to the provided URL with the provided body.
 // It will retry the request with the next available node if the request fails.
-func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Response, error) {
+func (c *Client) requestWithRetries(method string, endpoint string, body []byte) (*http.Response, error) {
 	// TODO: this should be in a config file
 	client := http.Client{
 		Timeout: time.Second * 5,
@@ -110,7 +77,16 @@ func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Res
 	var errorMessages []string
 	for i := range c.nodesEndpoints {
 		queryURL := joinURL(c.nodesEndpoints[i], endpoint)
-		resp, err := client.Post(queryURL, "application/json", bytes.NewBuffer(body))
+
+		var resp *http.Response
+		var err error
+
+		if method == "POST" {
+			resp, err = client.Post(queryURL, "application/json", bytes.NewBuffer(body))
+		} else {
+			resp, err = client.Get(queryURL)
+		}
+
 		if err == nil && resp.StatusCode == http.StatusOK {
 			return resp, nil // success, no need to retry
 		}

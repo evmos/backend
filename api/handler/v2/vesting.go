@@ -4,35 +4,9 @@
 package v2
 
 import (
-	"encoding/json"
-
-	"github.com/evmos/evmos/v12/x/vesting/types"
-	v1 "github.com/tharsis/dashboard-backend/api/handler/v1"
 	"github.com/tharsis/dashboard-backend/internal/v2/node/rest"
 	"github.com/valyala/fasthttp"
 )
-
-type VestingAccount struct {
-	Account struct {
-		Type               string                `json:"@type"`
-		BaseVestingAccount v1.BaseVestingAccount `json:"base_vesting_account"`
-		FunderAddress      string                `json:"funder_address"`
-		StartTime          string                `json:"start_time"`
-		LockupPeriods      []struct {
-			Length string              `json:"length"`
-			Amount []v1.BalanceElement `json:"amount"`
-		} `json:"lockup_periods"`
-		VestingPeriods []struct {
-			Length string              `json:"length"`
-			Amount []v1.BalanceElement `json:"amount"`
-		} `json:"vesting_periods"`
-	} `json:"account"`
-}
-
-type VestingByAddressResponse struct {
-	VestingAccount
-	types.QueryBalancesResponse
-}
 
 // VestingByAddress handles GET /v2/vesting/{address}.
 // It returns the vesting information of the requested address.
@@ -114,41 +88,12 @@ func (h *Handler) VestingByAddress(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	accountRes, err := restClient.Get("/cosmos/auth/v1beta1/accounts/" + address)
+	res, err := restClient.GetVestingAccount(address)
 
 	if err != nil {
-		ctx.Logger().Printf("Error querying vesting account from RPC: %s", err.Error())
+		ctx.Logger().Printf("Error getting vesting account: %s", err.Error())
 		sendInternalErrorResponse(ctx)
 		return
-	}
-
-	var account VestingAccount
-	err = json.Unmarshal(accountRes, &account)
-	if err != nil {
-		ctx.Logger().Printf("Error decoding vesting account: %s", err.Error())
-		sendInternalErrorResponse(ctx)
-		return
-	}
-
-	rewardsRes, err := restClient.Get("/evmos/vesting/v1/balances/" + address)
-
-	if err != nil {
-		ctx.Logger().Printf("Error querying vesting balance from RPC: %s", err.Error())
-		sendInternalErrorResponse(ctx)
-		return
-	}
-
-	var vestingBalance types.QueryBalancesResponse
-	err = json.Unmarshal(rewardsRes, &vestingBalance)
-	if err != nil {
-		ctx.Logger().Printf("Error decoding vesting account: %s", err.Error())
-		sendInternalErrorResponse(ctx)
-		return
-	}
-
-	res := VestingByAddressResponse{
-		VestingAccount:        account,
-		QueryBalancesResponse: vestingBalance,
 	}
 
 	sendSuccessfulJSONResponse(ctx, res)
