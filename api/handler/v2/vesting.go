@@ -3,7 +3,10 @@
 
 package v2
 
-import "github.com/valyala/fasthttp"
+import (
+	"github.com/tharsis/dashboard-backend/internal/v2/node/rest"
+	"github.com/valyala/fasthttp"
+)
 
 // VestingByAddress handles GET /v2/vesting/{address}.
 // It returns the vesting information of the requested address.
@@ -69,7 +72,6 @@ import "github.com/valyala/fasthttp"
 //	}
 func (h *Handler) VestingByAddress(ctx *fasthttp.RequestCtx) {
 	address := ctx.UserValue("address").(string)
-	// TODO - validate address before querying numia
 	if address == "" {
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		errorResponse := &ErrorResponse{
@@ -79,12 +81,19 @@ func (h *Handler) VestingByAddress(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	rewards, err := h.numiaRPCClient.QueryVestingAccount(address)
+	restClient, err := rest.NewClient("evmos")
 	if err != nil {
-		ctx.Logger().Printf("Error querying vesting account from Numia: %s", err.Error())
+		ctx.Logger().Printf("Error creating rest client: %s", err.Error())
 		sendInternalErrorResponse(ctx)
 		return
 	}
 
-	sendSuccessfulJSONResponse(ctx, rewards)
+	res, err := restClient.GetVestingAccount(address)
+	if err != nil {
+		ctx.Logger().Printf("Error getting vesting account: %s", err.Error())
+		sendInternalErrorResponse(ctx)
+		return
+	}
+
+	sendSuccessfulJSONResponse(ctx, res)
 }

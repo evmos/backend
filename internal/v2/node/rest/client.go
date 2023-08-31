@@ -35,9 +35,24 @@ func NewClient(network string) (*Client, error) {
 // post defines a wrapper around an HTTP POST request with a provided URL and body.
 // An error is returned if the request or reading the body fails.
 func (c *Client) post(endpoint string, body []byte) ([]byte, error) {
-	res, err := c.postRequestWithRetries(endpoint, body)
+	res, err := c.requestWithRetries("POST", endpoint, body)
 	if err != nil {
 		return nil, fmt.Errorf("error while making post request: %w", err)
+	}
+
+	bz, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	return bz, nil
+}
+
+// get defines a wrapper around an HTTP GET request with a provided URL.
+// An error is returned if the request or reading the body fails.
+func (c *Client) get(endpoint string) ([]byte, error) {
+	res, err := c.requestWithRetries("GET", endpoint, []byte{})
+	if err != nil {
+		return nil, fmt.Errorf("error while making get request: %w", err)
 	}
 
 	bz, err := io.ReadAll(res.Body)
@@ -53,7 +68,7 @@ type BadRequestError struct {
 
 // postRequestWithRetries performs a POST request to the provided URL with the provided body.
 // It will retry the request with the next available node if the request fails.
-func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Response, error) {
+func (c *Client) requestWithRetries(method string, endpoint string, body []byte) (*http.Response, error) {
 	// TODO: this should be in a config file
 	client := http.Client{
 		Timeout: time.Second * 5,
@@ -62,7 +77,16 @@ func (c *Client) postRequestWithRetries(endpoint string, body []byte) (*http.Res
 	var errorMessages []string
 	for i := range c.nodesEndpoints {
 		queryURL := joinURL(c.nodesEndpoints[i], endpoint)
-		resp, err := client.Post(queryURL, "application/json", bytes.NewBuffer(body))
+
+		var resp *http.Response
+		var err error
+
+		if method == "POST" {
+			resp, err = client.Post(queryURL, "application/json", bytes.NewBuffer(body))
+		} else {
+			resp, err = client.Get(queryURL)
+		}
+
 		if err == nil && resp.StatusCode == http.StatusOK {
 			return resp, nil // success, no need to retry
 		}

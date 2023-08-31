@@ -25,7 +25,11 @@ type BaseAccount struct {
 }
 
 type BaseVestingAccount struct {
-	BaseAccount BaseAccount `json:"base_account"`
+	BaseAccount      BaseAccount      `json:"base_account"`
+	OriginalVesting  []BalanceElement `json:"original_vesting"`
+	DelegatedFree    []BalanceElement `json:"delegated_free"`
+	DelegatedVesting []BalanceElement `json:"delegated_vesting"`
+	EndTime          string           `json:"end_time"`
 }
 type BaseAccountDetails struct {
 	Type               string             `json:"@type"`
