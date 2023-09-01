@@ -59,8 +59,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test-unit
     permissions:
-      contents: "read"
-      id-token: "write"
+      contents: read
+      id-token: write
+      packages: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -99,7 +100,9 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v4.5.0
         with:
-          images: ${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${{ matrix.component.name }}
+          images: |
+            ${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${{ matrix.component.name }}
+            ghcr.io/${{ github.repository }}/${{ matrix.component.name }}
           tags: |
             type=semver,pattern={{version}}
             type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
@@ -111,6 +114,14 @@ jobs:
       - name: Configure Docker with GCloud credentials
         shell: bash
         run: gcloud auth configure-docker --quiet ${{ vars.GCP_REGISTRY}}
+
+      # Login to GitHub Container Registry (GHCR)
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v4.1.0
@@ -141,6 +152,18 @@ jobs:
             -grace=336h
             -keep=5
             -tag-filter-any=^[a-zA-Z0-9-\.]+$
+
+      - name: Prune old images on ghcr.io
+        uses: vlaurin/action-ghcr-prune@v0.5.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          organization: ${{ github.repository_owner }}
+          container: backend/${{ matrix.component.name }}
+          dry-run: false
+          keep-younger-than: 14 # days
+          keep-last: 5
+          prune-untagged: true
+          prune-tags-regexes: ^[a-zA-Z0-9-\.]+$
 
   update-deployment-tags:
     needs: build
