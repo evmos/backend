@@ -164,6 +164,9 @@ func GetDenom(token string, srcChain string) (string, error) {
 		}
 		return tokensByName.Values.CosmosDenom, nil
 
+	} else if strings.HasPrefix(token, "ibc/") {
+		// That means that the token is already in the format ibc/{denom}, so it was converted by the requester
+		return token, nil
 	} else {
 		token, err := ERC20TokensByNameInternal(token)
 		if err != nil {
