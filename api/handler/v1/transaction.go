@@ -204,7 +204,7 @@ const (
 	DefaultGas float64 = 350000
 	// osmosis had an upgrade V15, and it seems they got rid of 0 fees and put in minimum fees
 	// such minimum fees are requiring more gas, from the expected 200000 to 250000
-	DefaultGasIbcTransfer          float64 = 250000
+	DefaultGasIbcTransfer          float64 = 300000
 	feeDenom                       string  = "aevmos"
 	EvmosTxFeeConvertAssetGas      float64 = 10500000
 	DefaultGasIbcTransferUint      uint64  = 200000

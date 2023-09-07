@@ -23,7 +23,7 @@ type BalanceResponse struct {
 
 func BalanceByNetworkAndDenom(ctx *fasthttp.RequestCtx) {
 	token := paramToString("token", ctx)
-	denom := ""
+	denom := token
 
 	coinConfigs, err := resources.GetERC20Tokens()
 	if err != nil {
