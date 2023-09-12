@@ -98,7 +98,7 @@ type ErrorResponse struct {
 func sendResponse(val string, err error, ctx *fasthttp.RequestCtx) {
 	if err != nil {
 		metrics.Send(err.Error())
-	var msg string
+		var msg string
 		if val == "" {
 			msg = "All Endpoints are failing"
 		} else {
@@ -107,10 +107,8 @@ func sendResponse(val string, err error, ctx *fasthttp.RequestCtx) {
 		errResponse := ErrorResponse{Error: msg}
 		sendJSONResponse(ctx, errResponse)
 		return
-	} else {
-		sendJSONResponse(ctx, val)
-		return
 	}
+	sendJSONResponse(ctx, val)
 }
 
 func sendJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) {
