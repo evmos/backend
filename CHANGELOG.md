@@ -36,6 +36,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+- (chore) [fse-536] Adding dependabot
 - (ci) [fse-673] Deleting codeball
 - (ci) [fse-478] Updating github actions and versions
 - (ci) [#5](https://github.com/evmos/backend/pull/5) RPC server refactor
