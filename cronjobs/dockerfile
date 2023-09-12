@@ -1,5 +1,5 @@
-FROM python:3.10.12-bookworm	
-RUN apt-get update && apt-get install -y netcat
+FROM python:3.10.12-bookworm
+RUN apt-get update && apt-get install -y netcat-traditional
 WORKDIR /code
 COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
