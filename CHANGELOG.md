@@ -36,11 +36,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Improvements
+
+- (chore) [fse-536] Adding dependabot
 - (chore) [fse-546] Upgrading docker version
 - (ci) [fse-673] Deleting codeball
 - (ci) [fse-478] Updating github actions and versions
 - (ci) [#5](https://github.com/evmos/backend/pull/5) RPC server refactor
-
-### Improvements
-
 - (ci) [#107](https://github.com/evmos/backend/pull/107) Add golangci linter.
