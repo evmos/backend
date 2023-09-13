@@ -62,7 +62,7 @@ func sendJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) {
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		ctx.Logger().Printf("Error encoding response: %s", err.Error())
-		ctx.SetStatusCode(http.StatusInternalServerError)
+		sendInternalErrorResponse(ctx)
 		return
 	}
 	ctx.Response.Header.SetContentType("application/json")

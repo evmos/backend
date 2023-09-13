@@ -4,7 +4,9 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/tharsis/dashboard-backend/internal/v1/constants"
@@ -89,22 +91,35 @@ func enforceEvmos(ctx *fasthttp.RequestCtx) error {
 	return fmt.Errorf("network is not Evmos")
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 func sendResponse(val string, err error, ctx *fasthttp.RequestCtx) {
-	ctx.Response.Header.SetContentType("application/json")
-	// if there is an error, report to sentry
 	if err != nil {
 		metrics.Send(err.Error())
+		var msg string
+		if val == "" {
+			msg = "All Endpoints are failing"
+		} else {
+			msg = val
+		}
+		errResponse := ErrorResponse{Error: msg}
+		sendJSONResponse(ctx, errResponse)
+		return
 	}
-	// if there is an error and no custom text, respond with standard text
-	if err != nil && val == "" { //nolint:gocritic
-		fmt.Fprint(ctx, "{\"error\":\"All Endpoints are failing\"}")
-	} else if err != nil && val != "" {
-		// respond with custom text
-		fmt.Fprint(ctx, "{\"error\":\""+val+"\"}")
-	} else {
-		// send successful response
-		fmt.Fprint(ctx, val)
+	sendJSONResponse(ctx, val)
+}
+
+func sendJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) {
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		ctx.Logger().Printf("Error encoding response: %s", err.Error())
+		ctx.SetStatusCode(http.StatusInternalServerError)
+		return
 	}
+	ctx.Response.Header.SetContentType("application/json")
+	ctx.SetBody(jsonResponse)
 }
 
 func buildErrorResponse(a string) string {
