@@ -108,7 +108,8 @@ func sendResponse(val string, err error, ctx *fasthttp.RequestCtx) {
 		sendJSONResponse(ctx, errResponse)
 		return
 	}
-	sendJSONResponse(ctx, val)
+	// Support backward compatibility while we depcrate the old endpoints
+	fmt.Fprint(ctx, val)
 }
 
 func sendJSONResponse(ctx *fasthttp.RequestCtx, response interface{}) {
