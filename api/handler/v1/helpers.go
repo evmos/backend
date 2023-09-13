@@ -109,6 +109,7 @@ func sendResponse(val string, err error, ctx *fasthttp.RequestCtx) {
 		return
 	}
 	// Support backward compatibility while we depcrate the old endpoints
+	ctx.Response.Header.SetContentType("application/json")
 	fmt.Fprint(ctx, val)
 }
 
