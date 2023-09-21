@@ -20,9 +20,9 @@ func ProcessProposals(proposalsRes string, v1 bool) ([]byte, error) {
 	}
 
 	var filteredProposals []blockchain.V1GovernanceProposal
-	for _, proposal := range jsonProposalRes.Proposals {
-		if proposal.Status != "PROPOSAL_STATUS_DEPOSIT_PERIOD" {
-			filteredProposals = append(filteredProposals, proposal)
+	for i := range jsonProposalRes.Proposals {
+		if jsonProposalRes.Proposals[i].Status != "PROPOSAL_STATUS_DEPOSIT_PERIOD" {
+			filteredProposals = append(filteredProposals, jsonProposalRes.Proposals[i])
 		}
 	}
 
