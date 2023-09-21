@@ -19,11 +19,18 @@ func ProcessProposals(proposalsRes string, v1 bool) ([]byte, error) {
 		return []byte{}, err
 	}
 
+	var filteredProposals []blockchain.V1GovernanceProposal
+	for i := range jsonProposalRes.Proposals {
+		if jsonProposalRes.Proposals[i].Status != "PROPOSAL_STATUS_DEPOSIT_PERIOD" {
+			filteredProposals = append(filteredProposals, jsonProposalRes.Proposals[i])
+		}
+	}
+
 	var proposalRes []byte
 
 	if v1 {
 		// Get current tally for proposals in voting period and overwrite final tally
-		proposals, err := blockchain.GetV1ProposalsTally(jsonProposalRes.Proposals)
+		proposals, err := blockchain.GetV1ProposalsTally(filteredProposals)
 		if err != nil {
 			return []byte{}, err
 		}
@@ -35,7 +42,7 @@ func ProcessProposals(proposalsRes string, v1 bool) ([]byte, error) {
 
 	} else {
 		// Get current tally for proposals in voting period and overwrite final tally
-		proposals, err := blockchain.GetProposalsTally(jsonProposalRes.Proposals)
+		proposals, err := blockchain.GetProposalsTally(filteredProposals)
 		if err != nil {
 			return []byte{}, err
 		}
