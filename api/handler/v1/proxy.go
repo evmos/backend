@@ -32,7 +32,7 @@ func Epochs(ctx *fasthttp.RequestCtx) {
 }
 
 func EthGasPriceInternal() (string, error) {
-	url := "https://eth.bd.evmos.org:8545"
+	url := "https://evmos-evm.publicnode.com"
 	val, _ := requester.MakePostGasPrice(url)
 	return val, nil
 }
