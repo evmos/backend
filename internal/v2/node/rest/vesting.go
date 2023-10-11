@@ -42,7 +42,7 @@ func (c *Client) GetVestingAccount(address string) (VestingByAddressResponse, er
 		return VestingByAddressResponse{}, fmt.Errorf("error decoding vesting account: %s", err.Error())
 	}
 
-	rewardsRes, err := c.get("/evmos/vesting/v1/balances/" + address)
+	rewardsRes, err := c.get("/evmos/vesting/v2/balances/" + address)
 	if err != nil {
 		return VestingByAddressResponse{}, fmt.Errorf("error querying vesting balance from RPC: %s", err.Error())
 	}
