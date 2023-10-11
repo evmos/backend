@@ -180,7 +180,7 @@ func ERC20ModuleBalance(ctx *fasthttp.RequestCtx) {
 		// TODO: consider moving this to a work or remove the container mutex
 		val, err := blockchain.GetERC20Balance(v.Erc20, ethAddress)
 		balance := "0"
-		if err == nil {
+		if err == nil && val != "" {
 			balance = val
 		}
 
