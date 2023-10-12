@@ -183,7 +183,7 @@ def process_chain(chain: str, chain_info):
 
     if len(web3_list.elements) > 2:
         web3_list.elements.sort(reverse=True)
-        redisSetEndpoint(chain, 'web3', 0, 'https://eth.bd.evmos.org:8545')
+        redisSetEndpoint(chain, 'web3', 0, 'https://evmos-evm.publicnode.com')
         setPrimaryEndpoint(chain, 'web3', web3_list.elements[0].url)
         setSecondaryEndpoint(chain, 'web3', web3_list.elements[1].url)
         setTertiaryEndpoint(chain, 'web3', web3_list.elements[2].url)
