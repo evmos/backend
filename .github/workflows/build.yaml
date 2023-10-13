@@ -35,6 +35,7 @@ jobs:
           github-token: ${{ secrets.github_token }}
         # Check only if there are differences in the source code
         if: env.GIT_DIFF
+
   test-unit:
     needs: golangci
     runs-on: ubuntu-latest
@@ -55,9 +56,54 @@ jobs:
         run: |
           make test
         if: env.GIT_DIFF
+
+  set-environment:
+    runs-on: ubuntu-latest
+    needs: [golangci, test-unit]
+    outputs:
+      env-variable: ${{ steps.set-env-var.outputs.patch_env }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Note: This fetches all branches and tags
+
+      - name: Check base ref
+        run: |
+          BASE_REF=$(git describe --contains --all HEAD)
+          echo "BASE_REF=$BASE_REF" >> $GITHUB_ENV
+
+      - name: Set ENV variable
+        id: set-env-var
+        run: |
+          PATCH_ENV="unknown" # Default value
+          case $GITHUB_REF in
+            refs/tags/*)
+              TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
+              BRANCHE=$(git branch -r --contains $TAG_COMMIT | sed 's/ *origin\///' | grep -v "HEAD" | head -n 1)
+              if [ "$BRANCHE" == "main" ]; then
+                PATCH_ENV="production"
+              fi
+              ;;
+            refs/heads/main)
+              PATCH_ENV="non-production"
+              ;;
+          esac
+          echo "PATCH_ENV=$PATCH_ENV" >> $GITHUB_ENV
+          echo "BRANCHE=$BRANCHE" >> $GITHUB_ENV
+          echo "::set-output name=patch_env::$PATCH_ENV" 
+
+      - name: Debug
+        run: |
+          echo "Env: ${PATCH_ENV}"
+          echo "Ref: ${{ github.ref }}"
+          echo "GitHub Ref: $GITHUB_REF"
+          echo "Base Ref: $BASE_REF"
+          echo "Branch: $BRANCHE"
+
   build:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test-unit
+    if: (github.event_name == 'push') && (needs.set-environment.outputs.env-variable == 'non-production')
+    needs: [set-environment]
     permissions:
       contents: read
       id-token: write
@@ -78,42 +124,21 @@ jobs:
             path: "./cors"
             dockerfile: "compose.dockerfile"
             image_name: "dashboard-backend_nginx"
-    env:
-      IMG_NAME: ${{ github.repository }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      # - name: Debug
-      #   run: |
-      #     echo "github.ref -> ${{ github.ref }}"
-      # - uses: hmarr/debug-action@v2
-      - name: Authenticate with Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v1
-        with:
-          workload_identity_provider: ${{ vars.GCP_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-          access_token_lifetime: 600s
 
       - name: Docker metadata
         id: metadata
         uses: docker/metadata-action@v4.5.0
         with:
           images: |
-            ${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${{ matrix.component.name }}
             ghcr.io/${{ github.repository }}/${{ matrix.component.name }}
           tags: |
             type=semver,pattern={{version}}
             type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
           flavor: |
             latest=${{ github.ref == 'refs/heads/main' }}
-
-      # Configure docker to use the gcloud command-line tool as a credential helper
-      # This avoids using docker/login-action as a middle man.
-      - name: Configure Docker with GCloud credentials
-        shell: bash
-        run: gcloud auth configure-docker --quiet ${{ vars.GCP_REGISTRY}}
 
       # Login to GitHub Container Registry (GHCR)
       - name: Login to GitHub Container Registry
@@ -142,17 +167,6 @@ jobs:
           name: image-tag-${{ matrix.component.name }}
           path: metadata-${{ matrix.component.name }}.txt
 
-      - name: Clean up old images
-        uses: "docker://europe-docker.pkg.dev/gcr-cleaner/gcr-cleaner/gcr-cleaner-cli"
-        # env:
-        #   GCRCLEANER_LOG: debug
-        with:
-          args: >-
-            -repo=${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${{ matrix.component.name }}
-            -grace=336h
-            -keep=5
-            -tag-filter-any=^[a-zA-Z0-9-\.]+$
-
       - name: Prune old images on ghcr.io
         uses: vlaurin/action-ghcr-prune@v0.5.0
         with:
@@ -165,12 +179,72 @@ jobs:
           prune-untagged: true
           prune-tags-regexes: ^[a-zA-Z0-9-\.]+$
 
-  update-deployment-tags:
-    needs: build
+  retag-and-push:
+    if: needs.set-environment.outputs.env-variable == 'production'
+    needs: [set-environment]
     runs-on: ubuntu-latest
-    env:
-      IMG_NAME: ${{ github.repository }}
+    outputs:
+      relese-tag: ${{ steps.get_version.outputs.TAG_VER }}
+    strategy:
+      matrix:
+        component:
+          - name: "api"
+            path: "."
+            dockerfile: "Dockerfile"
+            image_name: "dashboard-backend_api"
+          - name: "cron"
+            path: "./cronjobs"
+            dockerfile: "Dockerfile"
+            image_name: "dashboard-backend_cron"
+          - name: "nginx"
+            path: "./cors"
+            dockerfile: "Dockerfile"
+            image_name: "dashboard-backend_nginx"
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract Tag Name
+        id: get_version
+        run: echo "TAG_VER=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to GitHub Container Registry (GHCR)
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Re-tag image
+        run: |
+          COMMIT_HASH=$(git rev-parse --short "$TAG_VER")
+          docker pull ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${COMMIT_HASH}
+          docker tag ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${COMMIT_HASH} ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${TAG_VER}
+          docker push ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${TAG_VER}
+          echo "${{ matrix.component.name }} ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:$TAG_VER" > metadata-${{ matrix.component.name }}.txt
+      
+      - name: Upload image tags
+        uses: actions/upload-artifact@v2
+        with:
+          name: image-tag-${{ matrix.component.name }}
+          path: metadata-${{ matrix.component.name }}.txt
+
+  update-deployment-tags:
+    if: always() && needs.set-environment.outputs.env-variable != 'unknown'
+    needs: [set-environment,build,retag-and-push]
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ needs.set-environment.outputs.env-variable }}
+    steps:
+      - name: Use environment
+        run: |
+          echo "Deploying to environment ${{ needs.set-environment.outputs.env-variable }}"
+          echo "K8S_MANIFEST: ${{ vars.K8S_MANIFEST }}"
+
       - name: Download all artifacts
         uses: actions/download-artifact@v2
         with:
@@ -189,7 +263,7 @@ jobs:
             while read line; do
               COMPONENT=$(echo $line | cut -d' ' -f1)
               NEW_IMAGE=$(echo $line | cut -d' ' -f2-)
-              sed -i "s|${{ vars.GCP_REGISTRY }}/${{ vars.GCP_PROJECT }}/${{ env.IMG_NAME }}/${COMPONENT}:[^ ]*|${NEW_IMAGE}|" APPS/${{ vars.K8S_MANIFEST }}
+              sed -i "s|ghcr.io/${{ github.repository }}/${COMPONENT}:[^ ]*|${NEW_IMAGE}|" APPS/${{ vars.K8S_MANIFEST }}
             done < $filename
           done
 
