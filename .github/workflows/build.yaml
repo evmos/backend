@@ -1,4 +1,4 @@
-name: Build and publish Docker images to GCR
+name: Build and publish Docker images to GitHub Container Registry
 
 on:
   push:
@@ -79,7 +79,8 @@ jobs:
           PATCH_ENV="unknown" # Default value
           case $GITHUB_REF in
             refs/tags/*)
-              BRANCH=$(git branch --contains $GITHUB_SHA | sed 's/ *origin\///' | grep -v "HEAD" | grep main)
+              TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
+              BRANCH=$(git branch -r --contains $TAG_COMMIT | sed 's/ *origin\///' | grep -v "HEAD" | grep "main")
               if [ "$BRANCH" == "main" ]; then
                 PATCH_ENV="production"
               fi
@@ -211,7 +212,7 @@ jobs:
           path: metadata-${{ matrix.component.name }}.txt
 
   update-deployment-tags:
-    if: always() && needs.set-environment.outputs.env-variable != 'unknown'
+    if: always() && (needs.set-environment.outputs.env-variable != 'unknown' && needs.set-environment.outputs.env-variable != '')
     needs: [set-environment,build,retag-and-push]
     runs-on: ubuntu-latest
     environment:
