@@ -79,9 +79,8 @@ jobs:
           PATCH_ENV="unknown" # Default value
           case $GITHUB_REF in
             refs/tags/*)
-              TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
-              BRANCHE=$(git branch -r --contains $TAG_COMMIT | sed 's/ *origin\///' | grep -v "HEAD" | head -n 1)
-              if [ "$BRANCHE" == "main" ]; then
+              BRANCH=$(git branch --contains $GITHUB_SHA | sed 's/ *origin\///' | grep -v "HEAD" | grep main)
+              if [ "$BRANCH" == "main" ]; then
                 PATCH_ENV="production"
               fi
               ;;
@@ -90,16 +89,8 @@ jobs:
               ;;
           esac
           echo "PATCH_ENV=$PATCH_ENV" >> $GITHUB_ENV
-          echo "BRANCHE=$BRANCHE" >> $GITHUB_ENV
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
           echo "::set-output name=patch_env::$PATCH_ENV" 
-
-      - name: Debug
-        run: |
-          echo "Env: ${PATCH_ENV}"
-          echo "Ref: ${{ github.ref }}"
-          echo "GitHub Ref: $GITHUB_REF"
-          echo "Base Ref: $BASE_REF"
-          echo "Branch: $BRANCHE"
 
   build:
     if: (github.event_name == 'push') && (needs.set-environment.outputs.env-variable == 'non-production')
@@ -120,10 +111,6 @@ jobs:
             path: "./cronjobs"
             dockerfile: "dockerfile"
             image_name: "dashboard-backend_cron"
-          - name: "nginx"
-            path: "./cors"
-            dockerfile: "compose.dockerfile"
-            image_name: "dashboard-backend_nginx"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -183,8 +170,6 @@ jobs:
     if: needs.set-environment.outputs.env-variable == 'production'
     needs: [set-environment]
     runs-on: ubuntu-latest
-    outputs:
-      relese-tag: ${{ steps.get_version.outputs.TAG_VER }}
     strategy:
       matrix:
         component:
@@ -196,17 +181,9 @@ jobs:
             path: "./cronjobs"
             dockerfile: "Dockerfile"
             image_name: "dashboard-backend_cron"
-          - name: "nginx"
-            path: "./cors"
-            dockerfile: "Dockerfile"
-            image_name: "dashboard-backend_nginx"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Extract Tag Name
-        id: get_version
-        run: echo "TAG_VER=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -221,11 +198,11 @@ jobs:
 
       - name: Re-tag image
         run: |
-          COMMIT_HASH=$(git rev-parse --short "$TAG_VER")
+          COMMIT_HASH=$(git rev-parse --short "$GITHUB_REF_NAME")
           docker pull ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${COMMIT_HASH}
-          docker tag ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${COMMIT_HASH} ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${TAG_VER}
-          docker push ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${TAG_VER}
-          echo "${{ matrix.component.name }} ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:$TAG_VER" > metadata-${{ matrix.component.name }}.txt
+          docker tag ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${COMMIT_HASH} ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${GITHUB_REF_NAME}
+          docker push ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:${GITHUB_REF_NAME}
+          echo "${{ matrix.component.name }} ghcr.io/${{ github.repository }}/${{ matrix.component.name }}:$GITHUB_REF_NAME" > metadata-${{ matrix.component.name }}.txt
       
       - name: Upload image tags
         uses: actions/upload-artifact@v2
