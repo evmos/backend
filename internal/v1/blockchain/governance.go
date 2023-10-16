@@ -44,6 +44,8 @@ type V1GovernanceProposal struct {
 	} `json:"total_deposit"`
 	VotingStartTime string `json:"voting_start_time"`
 	VotingEndTime   string `json:"voting_end_time"`
+	Title           string `json:"title"`
+	Summary         string `json:"summary"`
 }
 
 type V1ProposalsResponse struct {
