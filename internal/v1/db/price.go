@@ -22,6 +22,11 @@ func RedisGetPrice(asset string, vsCurrency string) (string, error) {
 	return formatRedisResponse(val, err)
 }
 
+func RedisGet24HChange(asset string) (string, error) {
+	val, err := rdb.Get(ctxRedis, asset+"|24h|change").Result()
+	return formatRedisResponse(val, err)
+}
+
 func RedisSetPrice(asset string, vsCurrency string, price string) {
 	key := buildKeyPrice(asset, vsCurrency)
 	err := rdb.Set(ctxRedis, key, price, 0).Err()
