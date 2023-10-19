@@ -74,6 +74,15 @@ func GetCoingeckoPrice(coingeckoID string) string {
 	return price
 }
 
+func GetCoingecko24HChange(coingeckoID string) string {
+	change := "0"
+	val, err := db.RedisGet24HChange(coingeckoID)
+	if err == nil {
+		change = val
+	}
+	return change
+}
+
 func paramToString(param string, ctx *fasthttp.RequestCtx) string {
 	return fmt.Sprint(ctx.UserValue(param))
 }

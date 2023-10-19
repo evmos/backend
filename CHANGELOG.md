@@ -36,6 +36,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+- (chore) [fse-710] Bundle all price cron API calls into a single API call for all tokens
+- (chore) [fse-710] Fetch evmos 24h price change and return it on the ERC20ModuleBalance endpoint
+
 ### Improvements
 
 - (chore) [fse-536] Adding dependabot

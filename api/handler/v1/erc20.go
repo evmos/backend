@@ -52,9 +52,10 @@ type ERC20Entry struct {
 		URL            string `json:"url"`
 		HandlingAction string `json:"handlingAction"`
 	} `json:"handledByExternalUI"`
-	ERC20Address string `json:"erc20Address"`
-	PngSrc       string `json:"pngSrc"`
-	Prefix       string `json:"prefix"`
+	ERC20Address   string `json:"erc20Address"`
+	PngSrc         string `json:"pngSrc"`
+	Prefix         string `json:"prefix"`
+	Price24HChange string `json:"price24HChange"`
 }
 
 type ModuleBalanceContainer struct {
@@ -100,6 +101,7 @@ func ERC20ModuleEmptyBalance(ctx *fasthttp.RequestCtx) {
 		networkConfig := networkConfigs[configIdx]
 		mainnetConfig := resources.GetMainnetConfig(networkConfig)
 		coingeckoPrice := GetCoingeckoPrice(v.CoingeckoID)
+		coin24hChnage := GetCoingecko24HChange(v.CoingeckoID)
 		container.values[k] = ERC20Entry{
 			Name:                v.Name,
 			Symbol:              v.Symbol,
@@ -116,6 +118,7 @@ func ERC20ModuleEmptyBalance(ctx *fasthttp.RequestCtx) {
 			ERC20Address:        v.Erc20,
 			PngSrc:              v.PngSrc,
 			Prefix:              v.Prefix,
+			Price24HChange:      coin24hChnage,
 		}
 		index++
 	}
@@ -195,6 +198,7 @@ func ERC20ModuleBalance(ctx *fasthttp.RequestCtx) {
 		networkConfig := networkConfigs[configIdx]
 		mainnetConfig := resources.GetMainnetConfig(networkConfig)
 		coingeckoPrice := GetCoingeckoPrice(v.CoingeckoID)
+		coin24hChnage := GetCoingecko24HChange(v.CoingeckoID)
 
 		container.values[k] = ERC20Entry{
 			Name:                v.Name,
@@ -212,6 +216,7 @@ func ERC20ModuleBalance(ctx *fasthttp.RequestCtx) {
 			ERC20Address:        v.Erc20,
 			PngSrc:              v.PngSrc,
 			Prefix:              v.Prefix,
+			Price24HChange:      coin24hChnage,
 		}
 		index++
 	}

@@ -32,6 +32,9 @@ def redisSetPrice(asset: str, vs_currency: str, price: float):
     key = f'{asset}|{vs_currency}|price'
     r.mset({key: price})
 
+def redisSetEvmosChange(change: float):
+    key = f'evmos|24h|change'
+    r.mset({key: change})
 
 def redisGetPrice(asset: str, vs_currency: str) -> float | None:
     key = f'{asset}|{vs_currency}|price'

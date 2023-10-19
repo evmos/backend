@@ -8,38 +8,41 @@ import requests
 
 from github import get_tokens
 from helpers import get_erc20_coins
-from redis_functions import redisSetPrice
+from redis_functions import redisSetPrice, redisSetEvmosChange
 
 
-def get_dex_screener_price():
-    # Used only for evmos at the moment
-    url = "https://api.dexscreener.com/latest/dex/pairs/evmos/0xaea12f0b3b609811a0dc28dc02716c60d534f972"
-    resp = requests.get(url)
-    return float(resp.json().get("pair", {}).get("priceUsd", "0.0"))
-
-def get_price(asset: str, vs_currency: str):
+def get_evmos_change():
     try:
-        if asset == "evmos":
-            price = get_dex_screener_price()
-            return price
-        else:
-            url = 'https://api.coingecko.com/api/v3/simple/price?'
-            resp = requests.get(f'{url}ids={asset}&vs_currencies={vs_currency}')
-            print(resp)
-            return float(resp.json()[asset][vs_currency])
+        url = 'https://api.coingecko.com/api/v3/coins/evmos'
+        resp = requests.get(f'{url}')
+        json_resp = resp.json()
+        redisSetEvmosChange(json_resp["market_data"]["price_change_percentage_24h"])
+        return
+    except Exception:
+        return None
+
+def get_prices(vs_currency: str, erc20_module_coins):
+    asset_ids = []
+
+    for coin in erc20_module_coins:
+        if (coin["coingeckoId"] and coin["coingeckoId"] != ""):
+            asset_ids.append(coin["coingeckoId"])
+
+    delim = ","
+    try:
+        url = 'https://api.coingecko.com/api/v3/simple/price?'
+        resp = requests.get(f'{url}ids={delim.join(asset_ids)}&vs_currencies={vs_currency}')
+        return resp.json()
     except Exception:
         return None
 
 
-def process_assets(erc20_module_coins):
-    for coin in erc20_module_coins:
-        print(f'Getting price for {coin["tokenName"]}')
-        price = get_price(coin['coingeckoId'], 'usd')
+def process_assets(prices):
+    for asset in prices:
+        price = prices[asset].get('usd', None)
         if price is not None:
-            redisSetPrice(coin['coingeckoId'], 'usd', price)
-            print(f'Price {price} for {coin["tokenName"]}')
-        time.sleep(10)
-
+            redisSetPrice(asset, 'usd', price)
+            print(f'Price {price} for {asset}')
 
 running = True
 
@@ -50,7 +53,9 @@ def main():
         tracked_tokens = get_tokens()
         erc20_module_coins = get_erc20_coins(tracked_tokens)
         print('Getting prices...')
-        process_assets(erc20_module_coins)
+        prices = get_prices("usd", erc20_module_coins)
+        get_evmos_change()
+        process_assets(prices)
         time.sleep(300)
 
 
