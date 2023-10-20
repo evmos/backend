@@ -758,7 +758,7 @@ func Rewards(ctx *fasthttp.RequestCtx) {
 		length = len(sortedRewards)
 	}
 
-	if len(sortedRewards) <= 0 {
+	if len(sortedRewards) == 0 {
 		sendResponse("account does not have staking balance", errors.New(""), ctx)
 		return
 	}
