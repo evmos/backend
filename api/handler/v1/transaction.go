@@ -6,6 +6,7 @@ package v1
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"sort"
@@ -757,8 +758,12 @@ func Rewards(ctx *fasthttp.RequestCtx) {
 		length = len(sortedRewards)
 	}
 
-	msgs := make([]sdk.Msg, length)
+	if len(sortedRewards) <= 0 {
+		sendResponse("account does not have staking balance", errors.New(""), ctx)
+		return
+	}
 
+	msgs := make([]sdk.Msg, length)
 	for k, v := range sortedRewards {
 		if k > 6 {
 			break
