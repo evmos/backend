@@ -65,7 +65,8 @@ type ValidatorAPIResponse struct {
 
 func AllValidators(ctx *fasthttp.RequestCtx) {
 	if validators, err := db.RedisGetAllValidators("EVMOS"); err == nil {
-		sendResponse("{\"values\":"+validators+"}", err, ctx)
+		res := buildValuesResponse(validators)
+		sendResponse(res, err, ctx)
 		return
 	}
 
@@ -109,5 +110,6 @@ func AllValidators(ctx *fasthttp.RequestCtx) {
 	validatorsJSON := string(validatorsByte)
 
 	db.RedisSetAllValidators("EVMOS", validatorsJSON)
-	sendResponse("{\"values\":"+validatorsJSON+"}", err, ctx)
+	validatorsRes := buildValuesResponse(validatorsJSON)
+	sendResponse(validatorsRes, err, ctx)
 }

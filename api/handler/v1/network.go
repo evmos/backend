@@ -74,7 +74,7 @@ func NetworkConfigByNameInternal(name string) (string, error) {
 
 	for _, v := range val {
 		if strings.Contains(v.URL, name) {
-			res := "{\"values\":" + v.Content + "}"
+			res := buildValuesResponse(v.Content)
 			db.RedisSetNetworkConfigByName(name, res)
 			return res, nil
 		}

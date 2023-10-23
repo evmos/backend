@@ -77,6 +77,10 @@ func getTotalBalance(balance ERC20Entry) decimal.Dec {
 	return res
 }
 
+func buildValuesResponse(values string) string {
+	return "{\"values\":" + values + "}"
+}
+
 func ERC20ModuleEmptyBalance(ctx *fasthttp.RequestCtx) {
 	container := ModuleBalanceContainer{
 		values:         map[string]ERC20Entry{},
@@ -290,7 +294,7 @@ func ERC20TokensByNameInternal(name string) (string, error) {
 
 	for _, v := range val {
 		if strings.Contains(v.URL, name) {
-			res := "{\"values\":" + v.Content + "}"
+			res := buildValuesResponse(v.Content)
 			db.RedisSetERC20TokensByName(name, res)
 			return res, nil
 		}
