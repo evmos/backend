@@ -34,6 +34,10 @@ type StakingRewardsResponse struct {
 	} `json:"total"`
 }
 
+type ValueResponse struct {
+	Value interface{} `json:"value"`
+}
+
 func TotalStakingByAddress(ctx *fasthttp.RequestCtx) {
 	address := paramToString("address", ctx)
 
@@ -55,7 +59,17 @@ func TotalStakingByAddress(ctx *fasthttp.RequestCtx) {
 
 	totalStaked := blockchain.GetTotalStake(stakingResponse)
 
-	res := "{\"value\":\"" + totalStaked + "\"}"
+	stringRes, err := json.Marshal(
+		&ValueResponse{
+			Value: totalStaked,
+		},
+	)
+	if err != nil {
+		sendResponse("", err, ctx)
+		return
+	}
+
+	res := string(stringRes)
 	sendResponse(res, err, ctx)
 }
 

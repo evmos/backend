@@ -14,21 +14,27 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+type ValuesResponse struct {
+	Values interface{} `json:"values"`
+}
+
 func NetworkConfig(ctx *fasthttp.RequestCtx) {
 	networkConfigs, err := resources.GetNetworkConfigs()
 	if err != nil {
 		sendResponse(buildErrorResponse(err.Error()), nil, ctx)
 		return
 	}
-	stringRes, err := json.Marshal(networkConfigs)
+	stringRes, err := json.Marshal(
+		&ValuesResponse{
+			Values: networkConfigs,
+		},
+	)
 	if err != nil {
 		sendResponse("", err, ctx)
 		return
 	}
 
-	res := "{\"values\":" + string(stringRes) + "}"
-
-	sendResponse(res, nil, ctx)
+	sendResponse(string(stringRes), nil, ctx)
 }
 
 type SourceParams struct {
