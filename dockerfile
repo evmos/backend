@@ -6,7 +6,7 @@ COPY . .
 
 RUN CGO_ENABLED=1 GOOS=linux go build -o ./server --ldflags '-w -s -extldflags "-static"' ./cmd/server/
 
-FROM alpine:3.18 as alpine
+FROM alpine:3.19 as alpine
 
 RUN apk add -U --no-cache ca-certificates
 
