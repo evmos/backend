@@ -36,6 +36,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+## 1.3.5 - 2023-12-12
+
+- (chore) [fse-897] Use loadbalanced post request for eth gas price
+
 ## 1.3.4 - 2023-12-12
 
 - (chore) [fse-897] Replace lava RPC with allnodes RPC for eth gas price
