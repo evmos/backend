@@ -4,6 +4,7 @@
 package v1
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -32,8 +33,11 @@ func Epochs(ctx *fasthttp.RequestCtx) {
 }
 
 func EthGasPriceInternal() (string, error) {
-	url := "https://evmos-evm.publicnode.com"
-	val, _ := requester.MakePostGasPrice(url)
+	payload := bytes.NewBuffer([]byte(`{"jsonrpc":"2.0","method":"eth_gasPrice","params":[],"id":1}`))
+	val, err := requester.MakePostRequest("EVMOS", "web3", "/", payload.Bytes())
+	if err != nil {
+		return "", err
+	}
 	return val, nil
 }
 
