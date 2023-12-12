@@ -36,6 +36,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+## 1.3.3 - 2023-12-12
+
+- (chore) [fse-897] Replace lava RPC with allnodes RPC for eth gas price
 - (chore) [fse-792] Handle accounts with zero staking balance on rewards endpoint
 - (chore) [fse-710] Bundle all price cron API calls into a single API call for all tokens
 - (chore) [fse-710] Fetch evmos 24h price change and return it on the ERC20ModuleBalance endpoint
