@@ -272,6 +272,7 @@ type TokensByNameIBC struct {
 }
 
 type TokensByNameConfig struct {
+	CoinDenom    string          `json:"coinDenom"`
 	CosmosDenom  string          `json:"cosmosDenom"`
 	Ibc          TokensByNameIBC `json:"ibc"`
 	ERC20Address string          `json:"erc20Address"`
@@ -291,13 +292,20 @@ func ERC20TokensByNameInternal(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	// Caches all tokens on redis the first time this is called
 	for _, v := range val {
-		if strings.Contains(v.URL, name) {
-			res := buildValuesResponse(v.Content)
-			db.RedisSetERC20TokensByName(name, res)
-			return res, nil
+		res := buildValuesResponse(v.Content)
+		var tokensByName TokensByName
+		err = json.Unmarshal([]byte(res), &tokensByName)
+		if err != nil {
+			continue
 		}
+		db.RedisSetERC20TokensByName(tokensByName.Values.CoinDenom, res)
 	}
+
+	if val, err := db.RedisGetERC20TokensByName(name); err == nil {
+		return val, nil
+	}
+
 	return "", fmt.Errorf("invalid token, please try again")
 }
