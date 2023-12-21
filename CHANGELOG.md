@@ -36,13 +36,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+- (fix) [fse-900] Fix failing convertCoin and convertERC20 endpoints
+
 ## 1.3.7 - 2023-12-13
 
 - (chore) [fse-897] Update github actions
 
 ## 1.3.6 - 2023-12-13
 
-- (chore) [fse-897] Fix linter version 
+- (chore) [fse-897] Fix linter version
 
 ## 1.3.5 - 2023-12-12
 
