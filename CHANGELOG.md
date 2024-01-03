@@ -34,6 +34,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+- (fix): [fse-906] read the expected files when trying to read tokens
+
 ## Unreleased
 
 - (fix) [fse-900] Fix failing convertCoin and convertERC20 endpoints
