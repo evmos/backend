@@ -128,7 +128,7 @@ func GetJsonsFromFolder(url string, folder string) ([]File, error) {
 	for _, t := range m.Tree {
 		if t.Mode == "100644" {
 			// Is file
-			if strings.Contains(t.Path, folder) {
+			if strings.HasPrefix(t.Path, folder + "/") {
 				fileResponse, err := QueryGithubWithCache(t.URL)
 				if err != nil {
 					return []File{}, err
