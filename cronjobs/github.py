@@ -24,7 +24,7 @@ def get_git_directory_content(path: str):
         res = requests.get(CHAINS_DIRECTORY_URL, headers=headers, timeout=5)
         parsed = res.json()
         for entry in parsed.get('tree', []):
-            if (path in entry.get('path') and 'tree' not in entry.get('type')):
+            if (path in entry.get('path') and 'tree' not in entry.get('type') and entry.get('path').endswith('.json')):
                 res = requests.get(entry.get('url'), headers=headers, timeout=5)
                 token_detail = res.json()
                 file_content = token_detail.get('content')

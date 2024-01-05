@@ -13,7 +13,7 @@ import (
 
 func GetERC20Tokens() ([]CoinConfig, error) {
 	var erc20tokens []CoinConfig
-	if redisVal, err := db.RedisGetERC20TokensDirectory(); err == nil && redisVal != "null" {
+	if redisVal, err := db.RedisGetERC20TokensDirectory(); err == nil && redisVal != "null" && redisVal != "[]" {
 		err = json.Unmarshal([]byte(redisVal), &erc20tokens)
 		if err != nil {
 			return nil, err
