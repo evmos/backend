@@ -15,7 +15,7 @@ EVMOS = "EVMOS"
 INDEXING_DISABLED_ERROR = "transaction indexing is disabled"
 
 class Networks(Enum):
-    GRAV = 'GRAVITY'
+    GRAV = 'GRAVITYBRIDGE'
     EVMOS = 'EVMOS'
     OSMOSIS = 'OSMOSIS'
     COSMOS = 'COSMOS'
