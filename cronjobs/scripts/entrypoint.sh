@@ -19,4 +19,5 @@ do
   fi
   sleep 2
 done
-python $1.py
+
+python -u $1.py
