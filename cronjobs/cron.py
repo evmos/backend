@@ -127,7 +127,7 @@ def ping_rest(endpoint: str, rest_list: EndpointSafeList, tendermint_exposed=Tru
 
 
 def process_chain(chain: str, chain_info):
-    tendermint_exposed = chain != 'GRAVITY'
+    tendermint_exposed = chain != 'GRAVITYBRIDGE'
     rest_threads = []
     rest_list = EndpointSafeList()
     for rest in chain_info[chain]['rest']:

@@ -4,7 +4,7 @@
 package constants
 
 const (
-	GRAV    = "GRAVITY"
+	GRAV    = "GRAVITYBRIDGE"
 	EVMOS   = "EVMOS"
 	OSMOSIS = "OSMOSIS"
 	COSMOS  = "COSMOS"
