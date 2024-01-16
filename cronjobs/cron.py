@@ -16,6 +16,7 @@ from redis_functions import redisSetEndpoint
 from redis_functions import setPrimaryEndpoint
 from redis_functions import setSecondaryEndpoint
 from redis_functions import setTertiaryEndpoint
+from redis_functions import flushChains
 
 
 @total_ordering
@@ -195,21 +196,36 @@ running = True
 def main():
     global running
     threads = []
+    attempt = 0
     while running:
-        chain_data = get_chain_config()
-        chain_info = get_chains_info(chain_data)
-        start_time = time.time()
-        for chain in chain_info:
-            t = Thread(target=process_chain, args=(chain, chain_info, ))
-            t.start()
-            threads.append(t)
+        try:
+            print('Getting chain config...')
+            chain_data = get_chain_config()
+            chain_info = get_chains_info(chain_data)
+            start_time = time.time()
+            for chain in chain_info:
+                t = Thread(target=process_chain, args=(chain, chain_info, ))
+                t.start()
+                threads.append(t)
 
-        for t in threads:
-            t.join()
+            for t in threads:
+                t.join()
 
-        print(f'Time used: {time.time() - start_time}')
-        threads = []
-        time.sleep(5)
+            print(f'Time used: {time.time() - start_time}')
+            threads = []
+            attempt = 0
+            time.sleep(5)
+            
+        except Exception as e:
+            print('Failed to get chain config, flushing redis and trying again')
+            print(e)
+            attempt += 1
+            flushChains()
+            if attempt > 5:
+                time.sleep(5)
+
+               
+
 
 
 def signal_handler(sig, frame):
