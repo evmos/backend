@@ -101,3 +101,10 @@ def getChains():
     if not value:
         return None
     return json.loads(value)
+
+
+def flushChains():
+    r.delete(networkConfig)
+
+def flushTokens():
+    r.delete(erc20TokensDirectoryKey)

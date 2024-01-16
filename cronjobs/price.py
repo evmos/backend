@@ -8,7 +8,7 @@ import requests
 
 from github import get_tokens
 from helpers import get_erc20_coins
-from redis_functions import redisSetPrice, redisSetEvmosChange
+from redis_functions import redisSetPrice, redisSetEvmosChange, flushTokens
 
 
 def get_evmos_change():
@@ -49,14 +49,26 @@ running = True
 
 def main():
     global running
+    attempt = 0
     while running:
-        tracked_tokens = get_tokens()
-        erc20_module_coins = get_erc20_coins(tracked_tokens)
-        print('Getting prices...')
-        prices = get_prices("usd", erc20_module_coins)
-        get_evmos_change()
-        process_assets(prices)
-        time.sleep(300)
+        try:
+            tracked_tokens = get_tokens()
+            erc20_module_coins = get_erc20_coins(tracked_tokens)
+            print('Getting prices...')
+            prices = get_prices("usd", erc20_module_coins)
+            get_evmos_change()
+            process_assets(prices)
+            attempt = 0
+            time.sleep(300)
+        except Exception as e:
+            print('Failed to get prices, trying again')
+            print(e)
+            attempt += 1
+            flushTokens()
+            if attempt > 5:
+                time.sleep(5)
+
+            
 
 
 def signal_handler(sig, frame):
